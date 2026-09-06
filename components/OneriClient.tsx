@@ -7,12 +7,25 @@
 
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSyncExternalStore } from "react";
 import type { DishSuggestion, Recipe, SuggestionMode } from "@/lib/types";
 import { addToHistory } from "@/lib/history"; // tarif kaydetme
+import { addShoppingItems } from "@/lib/shopping";
+import {
+  addFavorite,
+  getFavoritesServerSnapshot,
+  getFavoritesSnapshot,
+  removeFavorite,
+  subscribeFavorites,
+} from "@/lib/favorites";
+import {
+  PLAN_DAYS,
+  setPlannedRecipe,
+  type PlanDay,
+} from "@/lib/week-plan";
 import {
   getMadeSnapshot,
   getMadeServerSnapshot,
@@ -57,6 +70,10 @@ const CUISINE_OPTIONS = [
   "Akdeniz mutfağı",
 ];
 
+const MEAL_TYPE_OPTIONS = ["", "Kahvaltı", "Öğle", "Akşam", "Atıştırmalık", "Tatlı"];
+const COOKING_METHOD_OPTIONS = ["", "Tencere", "Tava", "Fırın", "Pişirme yok"];
+const BUDGET_OPTIONS = ["", "Düşük", "Orta", "Yüksek"];
+
 // Form seçim kutularının ortak görünümü
 const SELECT_CLASS =
   "w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm text-stone-900 focus:border-orange-500 focus:outline-none focus:ring-1 focus:ring-orange-500 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100";
@@ -66,6 +83,7 @@ const LABEL_CLASS = "mb-1.5 block text-xs font-bold text-stone-500 dark:text-sto
 
 interface OneriClientProps {
   initialMode: SuggestionMode; // URL'den gelen başlangıç modu
+  initialFavoriteName?: string;
 }
 
 // Liste sırasını bozmadan, harf duyarsız tekrarları temizler
@@ -82,7 +100,10 @@ function dedupeIgnoreCase(names: string[]): string[] {
   return result;
 }
 
-export default function OneriClient({ initialMode }: OneriClientProps) {
+export default function OneriClient({
+  initialMode,
+  initialFavoriteName,
+}: OneriClientProps) {
   const router = useRouter(); // URL'i güncellemek için
 
   // İki dışlama deposunu React'e bağla
@@ -92,12 +113,20 @@ export default function OneriClient({ initialMode }: OneriClientProps) {
     getSuggestedSnapshot,
     getSuggestedServerSnapshot
   );
+  const favorites = useSyncExternalStore(
+    subscribeFavorites,
+    getFavoritesSnapshot,
+    getFavoritesServerSnapshot
+  );
 
   // Form durumu
   const [mode, setMode] = useState<SuggestionMode>(initialMode);
   const [ingredients, setIngredients] = useState<string[]>([]);
   const [servings, setServings] = useState(2);
   const [diet, setDiet] = useState("");
+  const [mealType, setMealType] = useState("");
+  const [cookingMethod, setCookingMethod] = useState("");
+  const [budgetLevel, setBudgetLevel] = useState("");
   const [maxTime, setMaxTime] = useState("");
   const [cuisine, setCuisine] = useState("");
 
@@ -115,6 +144,9 @@ export default function OneriClient({ initialMode }: OneriClientProps) {
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
   const [madeAdded, setMadeAdded] = useState(false);
+  const [shoppingAdded, setShoppingAdded] = useState(false);
+  const [planDay, setPlanDay] = useState<PlanDay>("Pazartesi");
+  const [planAdded, setPlanAdded] = useState(false);
 
   // Dışlama listesi = "yaptığım yemekler" + daha önce önerilenler.
   // useMemo: her render'da yeni dizi referansı üretmeyip useCallback bağımlılıklarını
@@ -144,9 +176,13 @@ export default function OneriClient({ initialMode }: OneriClientProps) {
           ingredients,
           servings,
           diet,
+          mealType,
+          cookingMethod,
+          budgetLevel,
           maxTime: maxTime ? Number(maxTime) : null,
           cuisine,
           excludeNames,
+          excludeMadeNames: made,
           excludeIngredients: [],
         }),
       });
@@ -168,7 +204,7 @@ export default function OneriClient({ initialMode }: OneriClientProps) {
     } finally {
       setListLoading(false);
     }
-  }, [mode, ingredients, servings, diet, maxTime, cuisine, excludeNames]);
+  }, [mode, ingredients, servings, diet, mealType, cookingMethod, budgetLevel, maxTime, cuisine, excludeNames, made]);
 
   // 2. Adım: seçilen yemeğin tam tarifini üretir
   const selectDish = useCallback(
@@ -189,10 +225,14 @@ export default function OneriClient({ initialMode }: OneriClientProps) {
             ingredients,
             servings,
             diet,
+            mealType,
+            cookingMethod,
+            budgetLevel,
             maxTime: maxTime ? Number(maxTime) : null,
             cuisine,
             // Seçilen yemeğin kendisini dışlamadan gönder
             excludeNames: excludeNames.filter((n) => n.toLowerCase() !== dishName.toLowerCase()),
+            excludeMadeNames: made,
             excludeIngredients: [],
             dishName,
           }),
@@ -213,7 +253,7 @@ export default function OneriClient({ initialMode }: OneriClientProps) {
         setRecipeLoading(false);
       }
     },
-    [mode, ingredients, servings, diet, maxTime, cuisine, excludeNames]
+    [mode, ingredients, servings, diet, mealType, cookingMethod, budgetLevel, maxTime, cuisine, excludeNames, made]
   );
 
   // Form gönderimi: moda göre geçerli mi kontrol et ve listeyi üret
@@ -283,6 +323,152 @@ export default function OneriClient({ initialMode }: OneriClientProps) {
     addMadeDish(recipe.name);
     setMadeAdded(true);
     setTimeout(() => setMadeAdded(false), 2000);
+  }
+
+  function handleAddMissingToShoppingList() {
+    if (!recipe || recipe.missingIngredients.length === 0) return;
+    const missing = new Set(recipe.missingIngredients);
+    addShoppingItems(
+      recipe.ingredients
+        .filter((ingredient) => missing.has(ingredient.name))
+        .map((ingredient) => ({
+          name: ingredient.name,
+          amount: ingredient.amount,
+          checked: false,
+        }))
+    );
+    setShoppingAdded(true);
+    setTimeout(() => setShoppingAdded(false), 2000);
+  }
+
+  const favoriteActive = recipe
+    ? favorites.some((item) => item.recipe.name.toLocaleLowerCase("tr-TR") === recipe.name.toLocaleLowerCase("tr-TR"))
+    : false;
+
+  useEffect(() => {
+    if (!initialFavoriteName || recipe) return;
+    const favorite = favorites.find(
+      (item) =>
+        item.recipe.name.toLocaleLowerCase("tr-TR") ===
+        initialFavoriteName.toLocaleLowerCase("tr-TR")
+    );
+    if (!favorite) return;
+    const timeoutId = window.setTimeout(() => {
+      setRecipe(favorite.recipe);
+      setSuggestions(null);
+    }, 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [favorites, initialFavoriteName, recipe]);
+
+  function handleFavorite() {
+    if (!recipe) return;
+    if (favoriteActive) {
+      removeFavorite(recipe.name);
+    } else {
+      addFavorite(recipe);
+    }
+  }
+
+  function handleAddToPlan() {
+    if (!recipe) return;
+    setPlannedRecipe(planDay, recipe);
+    setPlanAdded(true);
+    setTimeout(() => setPlanAdded(false), 2000);
+  }
+
+  function renderPlanControls() {
+    if (!recipe) return null;
+    return (
+      <div className="flex gap-2">
+        <select
+          aria-label="Plan günü"
+          value={planDay}
+          onChange={(event) => setPlanDay(event.target.value as PlanDay)}
+          className="min-w-0 flex-1 rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-xs text-stone-900 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
+        >
+          {PLAN_DAYS.map((day) => (
+            <option key={day} value={day}>
+              {day}
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={handleAddToPlan}
+          className="flex-1 rounded-lg border border-violet-600 px-3 py-2.5 text-xs font-bold text-violet-700 transition hover:bg-violet-50 dark:border-violet-700 dark:text-violet-300 dark:hover:bg-violet-950"
+        >
+          {planAdded ? "Plana Eklendi" : "Haftalık Plana Ekle"}
+        </button>
+      </div>
+    );
+  }
+
+  if (initialFavoriteName) {
+    return (
+      <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
+        <Link
+          href="/"
+          className="mb-6 inline-flex items-center gap-1 text-xs font-semibold text-stone-500 transition hover:text-orange-600 dark:text-stone-400 dark:hover:text-orange-400"
+        >
+          &larr; Ana Sayfaya Dön
+        </Link>
+
+        {recipeLoading && (
+          <div className="flex items-center justify-center gap-3 rounded-lg border border-stone-200 bg-white p-8 text-sm text-stone-500 dark:border-stone-800 dark:bg-stone-900 dark:text-stone-400">
+            <span className="h-5 w-5 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
+            Favori tarif açılıyor...
+          </div>
+        )}
+
+        {recipeError && (
+          <div className="rounded-lg border border-red-600/50 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+            {recipeError}
+          </div>
+        )}
+
+        {recipe && !recipeLoading && (
+          <div className="space-y-4">
+            <TarifKarti recipe={recipe} />
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={handleCopy}
+                className="flex-1 rounded-lg border border-stone-800 bg-stone-900 px-4 py-2.5 text-xs font-bold text-stone-100 transition hover:bg-stone-800 dark:border-stone-600 dark:bg-stone-700 dark:hover:bg-stone-600"
+              >
+                {copied ? "Kopyalandı" : "Kopyala"}
+              </button>
+              <button
+                onClick={handleSave}
+                className="flex-1 rounded-lg bg-orange-600 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-orange-500"
+              >
+                {saved ? "Kaydedildi" : "Kaydet"}
+              </button>
+              <button
+                onClick={handleFavorite}
+                className="flex-1 rounded-lg border border-sky-600 px-4 py-2.5 text-xs font-bold text-sky-700 transition hover:bg-sky-50 dark:border-sky-700 dark:text-sky-300 dark:hover:bg-sky-950"
+              >
+                Favoriden Çıkar
+              </button>
+            </div>
+            {renderPlanControls()}
+            {recipe.missingIngredients.length > 0 && (
+              <button
+                onClick={handleAddMissingToShoppingList}
+                className="w-full rounded-lg border border-sky-600 bg-sky-50 px-4 py-2.5 text-xs font-bold text-sky-700 transition hover:bg-sky-100 dark:border-sky-800 dark:bg-sky-950/40 dark:text-sky-300 dark:hover:bg-sky-950"
+              >
+                {shoppingAdded
+                  ? "Eksik malzemeler listeye eklendi"
+                  : "Eksik Malzemeleri Alışveriş Listesine Ekle"}
+              </button>
+            )}
+            <Link
+              href="/"
+              className="block w-full rounded-lg border border-stone-300 px-4 py-2.5 text-center text-xs font-bold text-stone-600 transition hover:bg-stone-100 dark:border-stone-700 dark:text-stone-300 dark:hover:bg-stone-800"
+            >
+              &larr; Ana Sayfaya Dön
+            </Link>
+          </div>
+        )}
+      </main>
+    );
   }
 
   return (
@@ -412,6 +598,60 @@ export default function OneriClient({ initialMode }: OneriClientProps) {
               {CUISINE_OPTIONS.map((c) => (
                 <option key={c} value={c}>
                   {c || "Fark etmez"}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="mealType" className={LABEL_CLASS}>
+              Öğün
+            </label>
+            <select
+              id="mealType"
+              value={mealType}
+              onChange={(e) => setMealType(e.target.value)}
+              className={SELECT_CLASS}
+            >
+              {MEAL_TYPE_OPTIONS.map((option) => (
+                <option key={option} value={option}>
+                  {option || "Öğün fark etmez"}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="cookingMethod" className={LABEL_CLASS}>
+              Pişirme yöntemi
+            </label>
+            <select
+              id="cookingMethod"
+              value={cookingMethod}
+              onChange={(e) => setCookingMethod(e.target.value)}
+              className={SELECT_CLASS}
+            >
+              {COOKING_METHOD_OPTIONS.map((option) => (
+                <option key={option} value={option}>
+                  {option || "Yöntem fark etmez"}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label htmlFor="budgetLevel" className={LABEL_CLASS}>
+              Bütçe
+            </label>
+            <select
+              id="budgetLevel"
+              value={budgetLevel}
+              onChange={(e) => setBudgetLevel(e.target.value)}
+              className={SELECT_CLASS}
+            >
+              {BUDGET_OPTIONS.map((option) => (
+                <option key={option} value={option}>
+                  {option || "Bütçe fark etmez"}
                 </option>
               ))}
             </select>
@@ -555,6 +795,7 @@ export default function OneriClient({ initialMode }: OneriClientProps) {
               Başka Liste
             </button>
           </div>
+          {renderPlanControls()}
           {/* Aksiyonlar: kopyala / kaydet / yaptım */}
           <div className="flex flex-wrap gap-2">
             <button
@@ -575,7 +816,23 @@ export default function OneriClient({ initialMode }: OneriClientProps) {
             >
               {madeAdded ? "Eklendi" : "Yaptım, Önerme"}
             </button>
+            <button
+              onClick={handleFavorite}
+              className="flex-1 rounded-lg border border-sky-600 px-4 py-2.5 text-xs font-bold text-sky-700 transition hover:bg-sky-50 dark:border-sky-700 dark:text-sky-300 dark:hover:bg-sky-950"
+            >
+              {favoriteActive ? "Favoriden Çıkar" : "Favoriye Ekle"}
+            </button>
           </div>
+          {recipe.missingIngredients.length > 0 && (
+            <button
+              onClick={handleAddMissingToShoppingList}
+              className="w-full rounded-lg border border-sky-600 bg-sky-50 px-4 py-2.5 text-xs font-bold text-sky-700 transition hover:bg-sky-100 dark:border-sky-800 dark:bg-sky-950/40 dark:text-sky-300 dark:hover:bg-sky-950"
+            >
+              {shoppingAdded
+                ? "Eksik malzemeler listeye eklendi"
+                : "Eksik Malzemeleri Alışveriş Listesine Ekle"}
+            </button>
+          )}
         </div>
       )}
     </main>

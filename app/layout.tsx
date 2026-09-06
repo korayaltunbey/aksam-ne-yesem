@@ -5,6 +5,7 @@
 // - Sabit üst bar ve içerik alanı
 
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { Spline_Sans_Mono } from "next/font/google"; // Berkeley Mono'nun ücretsiz alternatifi
 import { themeInitScript } from "@/lib/theme"; // ilk boyamadan önce temayı uygulayan kod
 import Header from "@/components/Header"; // her sayfada görünen üst bar
@@ -27,7 +28,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     // suppressHydrationWarning: tema script'i hydration'dan önce <html> sınıfını
     // değiştirdiği için React'e bu öğeyi karşılaştırmamasını söyler.

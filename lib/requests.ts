@@ -22,12 +22,21 @@ export function parseSuggestionRequest(body: unknown): {
 
   // Malzemeler: yalnızca metin olarak kabul et, boşları at
   const ingredients = Array.isArray(b.ingredients)
-    ? b.ingredients.map((i) => String(i).trim()).filter((i) => i.length > 0)
+    ? b.ingredients
+        .filter((ingredient): ingredient is string => typeof ingredient === "string")
+        .map((ingredient) => ingredient.trim())
+        .filter((ingredient) => ingredient.length > 0)
+        .slice(0, 100)
     : [];
 
   // Kişi sayısı 1-20 aralığına sıkıştırılır (güvenlik/aşırı kullanım önlemi)
   const servings = Math.min(Math.max(Number(b.servings) || 2, 1), 20);
   const diet = typeof b.diet === "string" ? b.diet.trim() : "";
+  const mealType = typeof b.mealType === "string" ? b.mealType.trim() : "";
+  const cookingMethod =
+    typeof b.cookingMethod === "string" ? b.cookingMethod.trim() : "";
+  const budgetLevel =
+    typeof b.budgetLevel === "string" ? b.budgetLevel.trim() : "";
 
   // Maksimum süre pozitif sayıysa kabul edilir, değilse boş
   const maxTime =
@@ -40,12 +49,14 @@ export function parseSuggestionRequest(body: unknown): {
   const stringList = (value: unknown, limit = 50): string[] =>
     Array.isArray(value)
       ? value
-          .map((v) => String(v).trim())
+          .filter((item): item is string => typeof item === "string")
+          .map((item) => item.trim())
           .filter((v) => v.length > 0)
           .slice(0, limit)
       : [];
 
   const excludeNames = stringList(b.excludeNames);
+  const excludeMadeNames = stringList(b.excludeMadeNames);
   const excludeIngredients = stringList(b.excludeIngredients);
 
   // Dolap modunda en az bir malzeme şart
@@ -59,9 +70,13 @@ export function parseSuggestionRequest(body: unknown): {
       ingredients,
       servings,
       diet,
+      mealType,
+      cookingMethod,
+      budgetLevel,
       maxTime,
       cuisine,
       excludeNames,
+      excludeMadeNames,
       excludeIngredients,
     },
   };

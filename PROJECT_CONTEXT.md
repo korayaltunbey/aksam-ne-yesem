@@ -5,7 +5,7 @@
 Akşam Ne Yesem?, elinizdeki malzemelere ve tercihlerinize göre uygun yemekleri keşfetmenizi sağlayan yerel bir yemek öneri uygulamasıdır.
 
 - Paket adı: `aksam-ne-yesem`
-- Tarif kataloğu: 194 tarif
+- Tarif kataloğu: 211 tarif
 - Veritabanı: `data/aksam-ne-yesem.db`
 - Veritabanı teknolojisi: SQLite + Drizzle ORM
 - Uygulama: Next.js App Router, React, TypeScript ve Tailwind CSS
@@ -52,6 +52,18 @@ Tarifler ve öneriler yerel katalogdan deterministik olarak üretilir; runtime s
 - `db/seed.ts`: Idempotent tarif kataloğu seed'i.
 - `scripts/test-recommendations.ts`: Recommendation regression testleri.
 
+Eksik tarif malzemeleri `lib/shopping.ts` üzerinden `foof-shopping-list` localStorage anahtarında tutulur; ana sayfada miktarlarıyla işaretlenebilir, silinebilir veya tamamen temizlenebilir.
+
+Favori tarifler `lib/favorites.ts` üzerinden `foof-favorites` localStorage anahtarında tutulur; tarifin o anki ölçeklenmiş porsiyon bilgisi korunur ve ana sayfadan kaldırılabilir.
+
+Tarif hazırlanış ilerlemesi `lib/steps.ts` üzerinden `foof-recipe-steps` localStorage anahtarında tarif adına göre tutulur; adımlar işaretlenebilir, yenileme sonrası korunur ve tarif kartından sıfırlanabilir.
+
+Haftalık yemek planı `lib/week-plan.ts` üzerinden `foof-week-plan` localStorage anahtarında tutulur; tarif detayından gün seçilerek eklenir ve ana sayfada gün bazında kaldırılabilir.
+
+Tarif metadata alanları `recipes` tablosunda tutulur: `mealType`, `cookingMethod`, `budgetLevel`, `caloriesPerServing`, `proteinGrams` ve `isFreezerFriendly`. Alanlar geriye dönük uyumlu olarak nullable/varsayılanlıdır; mevcut tarifler metadata olmadan da çalışır.
+
+`estimatedCostPerServing` alanı küratörlü tariflerde yaklaşık TL/porsiyon maliyetini taşır. Bu değer tarif kartında yaklaşık olarak gösterilir; kalori ve protein alanları doğrulanmış veri yoksa boş bırakılır.
+
 ## Recommendation davranışı
 
 Dolaptakiler modunda en az bir kullanıcı malzemesiyle eşleşen tarifler gösterilir. Sıralama şu önceliklerle yapılır:
@@ -62,13 +74,13 @@ Dolaptakiler modunda en az bir kullanıcı malzemesiyle eşleşen tarifler göst
 4. Hazırlama süresi
 5. Tarif adı
 
-Ingredient matching normalization ve token-aware eşleşme kullanır. Bu sayede `tavuk`, `tavuk göğsü` gibi anlamlı alt türler eşleşebilir. Diyet, mutfak, süre, `excludeNames` ve `excludeIngredients` filtreleri recommendation/repository katmanında uygulanır.
+Ingredient matching normalization ve token-aware eşleşme kullanır. Bu sayede `tavuk`, `tavuk göğsü` gibi anlamlı alt türler eşleşebilir. Diyet, mutfak, süre, öğün, pişirme yöntemi, bütçe, `excludeNames` ve `excludeIngredients` filtreleri recommendation/repository katmanında uygulanır.
 
 Genel `Bana Öner` modunda ingredient filtresi uygulanmaz; diğer filtreler çalışmaya devam eder. Dolaptakiler modunda öneri geçmişi uygun tariflerin tamamını dışlarsa, uygun tarifleri yeniden kullanabilen güvenli fallback uygulanır.
 
 ## Tarif kataloğu ve veritabanı
 
-Katalog 194 tarif içerir. Türk, İtalyan, Asya, Meksika, Akdeniz ve diğer desteklenen mutfaklar; kahvaltı, çorba, ana yemek, salata/meze, hamur işi ve tatlı kategorileri bulunur. Diyet etiketleri, süreler, kişi sayıları ve ingredient miktarları seed verisinde tutulur.
+Katalog 211 tarif içerir. Türk, İtalyan, Asya, Meksika, Akdeniz ve diğer desteklenen mutfaklar; kahvaltı, çorba, ana yemek, salata/meze, hamur işi ve tatlı kategorileri bulunur. Diyet etiketleri, süreler, kişi sayıları ve ingredient miktarları seed verisinde tutulur.
 
 `db/seed.ts` slug değerleri üzerinden idempotent çalışır ve mevcut tarifleri korur. Veritabanı dosyası `data/aksam-ne-yesem.db` olarak tutulur; mevcut katalog yeni dosya adına taşınarak korunmuştur.
 
@@ -94,4 +106,4 @@ npm run lint
 npm run build
 ```
 
-Bu dosya, Akşam Ne Yesem? uygulamasının güncel SQLite + Drizzle tabanlı yerel recommendation mimarisini ve 194 tariflik kataloğunu yansıtır.
+Bu dosya, Akşam Ne Yesem? uygulamasının güncel SQLite + Drizzle tabanlı yerel recommendation mimarisini ve 211 tariflik kataloğunu yansıtır.

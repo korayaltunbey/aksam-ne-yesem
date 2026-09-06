@@ -15,6 +15,13 @@ export default async function OneriPage({ searchParams }: Props) {
   // Yalnızca bilinen iki değer kabul edilir, aksi halde dolap varsayılır
   const modeParam = typeof params.mode === "string" ? params.mode : "dolap";
   const initialMode: SuggestionMode = modeParam === "bana" ? "bana" : "dolap";
+  const initialFavoriteName =
+    typeof params.favorite === "string" ? params.favorite : undefined;
 
-  return <OneriClient initialMode={initialMode} />;
+  return (
+    <OneriClient
+      initialMode={initialMode}
+      initialFavoriteName={initialFavoriteName}
+    />
+  );
 }

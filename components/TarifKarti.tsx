@@ -5,6 +5,14 @@
 "use client";
 
 import type { Recipe } from "@/lib/types";
+import { useSyncExternalStore } from "react";
+import {
+  getStepsServerSnapshot,
+  getStepsSnapshot,
+  resetRecipeSteps,
+  subscribeSteps,
+  toggleRecipeStep,
+} from "@/lib/steps";
 
 interface TarifKartiProps {
   recipe: Recipe; // gösterilecek tarif
@@ -18,6 +26,17 @@ const DIFFICULTY_STYLES: Record<Recipe["difficulty"], string> = {
 };
 
 export default function TarifKarti({ recipe }: TarifKartiProps) {
+  const stepProgress = useSyncExternalStore(
+    subscribeSteps,
+    getStepsSnapshot,
+    getStepsServerSnapshot
+  ).find(
+    (item) =>
+      item.recipeName.toLocaleLowerCase("tr-TR") ===
+      recipe.name.toLocaleLowerCase("tr-TR")
+  );
+  const completedSteps = new Set(stepProgress?.completedSteps ?? []);
+
   return (
     <article className="overflow-hidden rounded-xl border border-stone-200 bg-white shadow-lg shadow-black/10 dark:border-stone-800 dark:bg-stone-900 dark:shadow-black/30">
       {/* Başlık bandı: yemek adı + meta bilgiler */}
@@ -36,10 +55,52 @@ export default function TarifKarti({ recipe }: TarifKartiProps) {
           <span className="inline-flex items-center gap-1.5 rounded-md bg-black/25 px-2.5 py-1">
             &#128100; {recipe.servings} kişilik
           </span>
+          {recipe.mealType && (
+            <span className="inline-flex items-center rounded-md bg-black/25 px-2.5 py-1">
+              {recipe.mealType}
+            </span>
+          )}
+          {recipe.cookingMethod && (
+            <span className="inline-flex items-center rounded-md bg-black/25 px-2.5 py-1">
+              {recipe.cookingMethod}
+            </span>
+          )}
+          {recipe.budgetLevel && (
+            <span className="inline-flex items-center rounded-md bg-black/25 px-2.5 py-1">
+              Bütçe: {recipe.budgetLevel}
+            </span>
+          )}
+          {recipe.estimatedCostPerServing !== undefined && (
+            <span className="inline-flex items-center rounded-md bg-black/25 px-2.5 py-1">
+              ~{recipe.estimatedCostPerServing} TL / porsiyon
+            </span>
+          )}
         </div>
       </div>
 
       <div className="space-y-6 p-6">
+        {(recipe.caloriesPerServing !== undefined ||
+          recipe.proteinGrams !== undefined ||
+          recipe.isFreezerFriendly) && (
+          <section className="flex flex-wrap gap-2 text-xs text-stone-600 dark:text-stone-300">
+            {recipe.caloriesPerServing !== undefined && (
+              <span className="rounded-md border border-stone-200 px-2.5 py-1 dark:border-stone-700">
+                {recipe.caloriesPerServing} kcal / porsiyon
+              </span>
+            )}
+            {recipe.proteinGrams !== undefined && (
+              <span className="rounded-md border border-stone-200 px-2.5 py-1 dark:border-stone-700">
+                {recipe.proteinGrams} g protein / porsiyon
+              </span>
+            )}
+            {recipe.isFreezerFriendly && (
+              <span className="rounded-md border border-stone-200 px-2.5 py-1 dark:border-stone-700">
+                Dondurulabilir
+              </span>
+            )}
+          </section>
+        )}
+
         {/* Malzeme listesi: ölçüler sağa hizalı mono yazı tipinde */}
         <section>
           <h3 className="mb-2 text-xs font-bold text-stone-500 dark:text-stone-400">
@@ -71,20 +132,43 @@ export default function TarifKarti({ recipe }: TarifKartiProps) {
 
         {/* Adım adım hazırlanış: numaralı zaman çizelgesi */}
         <section>
-          <h3 className="mb-3 text-xs font-bold text-stone-500 dark:text-stone-400">
-            Hazırlanışı
-          </h3>
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h3 className="text-xs font-bold text-stone-500 dark:text-stone-400">
+              Hazırlanışı ({completedSteps.size}/{recipe.steps.length})
+            </h3>
+            {completedSteps.size > 0 && (
+              <button
+                type="button"
+                onClick={() => resetRecipeSteps(recipe.name)}
+                className="text-[11px] font-semibold text-stone-400 transition hover:text-red-600 dark:hover:text-red-400"
+              >
+                Adımları Sıfırla
+              </button>
+            )}
+          </div>
           <ol className="space-y-0">
             {recipe.steps.map((step, i) => (
-              <li key={i} className="relative flex gap-4 pb-5 last:pb-0">
+              <li key={i} className="relative flex gap-3 pb-5 last:pb-0">
                 {/* Adımlar arası dikey bağlantı çizgisi */}
                 {i < recipe.steps.length - 1 && (
                   <span className="absolute left-[13px] top-7 h-full w-px bg-stone-200 dark:bg-stone-700" />
                 )}
-                <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md border border-orange-600 bg-orange-600/10 font-mono text-xs font-bold text-orange-600 dark:text-orange-400">
-                  {i + 1}
-                </span>
-                <p className="text-sm leading-relaxed text-stone-700 dark:text-stone-300">{step}</p>
+                <input
+                  id={`recipe-step-${i}`}
+                  type="checkbox"
+                  checked={completedSteps.has(i)}
+                  onChange={() => toggleRecipeStep(recipe.name, i)}
+                  aria-label={`${i + 1}. adımı tamamlandı`}
+                  className="mt-2 h-4 w-4 shrink-0 accent-orange-600"
+                />
+                <label
+                  htmlFor={`recipe-step-${i}`}
+                  className={`cursor-pointer text-sm leading-relaxed text-stone-700 dark:text-stone-300 ${
+                    completedSteps.has(i) ? "text-stone-400 line-through dark:text-stone-500" : ""
+                  }`}
+                >
+                  {step}
+                </label>
               </li>
             ))}
           </ol>

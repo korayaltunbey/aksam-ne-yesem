@@ -1,46 +1,50 @@
 # Akşam Ne Yesem?
 
-Elinizdeki malzemelere ve tercihlerinize göre uygun yemekleri keşfetmenizi sağlayan bir yemek öneri uygulaması.
+Elindeki malzemelere, damak tercihine ve ayırabileceğin zamana göre yemek önerileri sunan yerel bir Next.js uygulaması.
 
-## Özellikler
+## Öne çıkan özellikler
 
-- Dolaptaki malzemelere göre yemek önerme
-- Malzeme girmeden genel yemek önerileri alma
-- En fazla 5 yemeklik sonuç listesi
-- Mutfak, diyet ve maksimum süre filtreleri
-- Elle malzeme girişi ve sık kullanılan malzeme seçenekleri
-- Tarif detaylarını görüntüleme
-- Tarif miktarlarını kişi sayısına göre ölçekleme
+- Dolaptaki malzemelerle veya genel olarak yemek önerme
+- Diyet, mutfak/yöre, süre, öğün, pişirme yöntemi ve bütçe filtreleri
+- Malzeme eşleşmesi ve eksik temel malzeme sayısına göre sıralama
+- Kişi sayısına göre otomatik porsiyon ölçekleme
+- Tarif detayları, adım ilerlemesi ve kopyalama
+- Favoriler, alışveriş listesi ve haftalık yemek planı
 - Daha önce önerilen veya yapılan yemekleri tekrar önermeme
-- Tarif kaydetme, kopyalama ve tema tercihi
+- Açık/koyu tema
+- Harici bir yemek üretim servisi gerektirmeyen yerel SQLite katalogu
 
-## Kullanılan teknolojiler
+## Teknoloji
 
-- Next.js 16 ve App Router
+- Next.js 16 App Router
 - React 19
 - TypeScript
-- Tailwind CSS
-- SQLite
-- Drizzle ORM
-- better-sqlite3
+- Tailwind CSS 4
+- SQLite, Drizzle ORM ve better-sqlite3
 
-## Nasıl çalışır?
+## Gereksinimler
 
-Tarif kataloğu yerel SQLite veritabanından okunur. Recommendation katmanı malzeme eşleşmesini, ingredient coverage değerini, skorlamayı ve filtreleri uygular. Tarif seçildiğinde aynı katalogdan tarif detayları alınır ve miktarlar kişi sayısına göre ölçeklenir.
+- Node.js 22 veya daha yeni bir sürüm
+- npm
 
-Uygulama çalışma sırasında harici bir yemek üretim servisine ihtiyaç duymaz.
-
-Mevcut katalogda 194 tarif bulunur. Katalog farklı mutfakları, kategorileri, diyet etiketlerini ve süre aralıklarını kapsar.
+`better-sqlite3` native bir Node modülüdür. Windows'ta hazır binary kullanılamazsa Visual Studio'nun **Desktop development with C++** workload'u gerekebilir.
 
 ## Kurulum
 
-Bağımlılıkları kurun:
+Projeyi klonlayın:
 
 ```bash
-npm install
+git clone <REPOSITORY_URL>
+cd aksam-ne-yesem
 ```
 
-Veritabanı şemasını hazırlayın ve seed kataloğunu uygulayın:
+Bağımlılıkları lock dosyasına bağlı olarak kurun:
+
+```bash
+npm ci
+```
+
+Yerel SQLite veritabanını oluşturup katalogu yükleyin:
 
 ```bash
 npm run db:migrate
@@ -53,20 +57,47 @@ Geliştirme sunucusunu başlatın:
 npm run dev
 ```
 
-Ardından `http://localhost:3000` adresini açın.
+Tarayıcıdan [http://localhost:3000](http://localhost:3000) adresini açın.
+
+## Ağdan erişim
+
+Aynı ağdaki başka bir cihazdan test etmek için:
+
+```bash
+npm run dev -- --hostname 0.0.0.0
+```
+
+Ardından bilgisayarın yerel IP adresini kullanın:
+
+```text
+http://BILGISAYAR_IP_ADRESI:3000
+```
+
+IP adresi değişirse `next.config.ts` içindeki `allowedDevOrigins` değerini güncelleyin. Windows Güvenlik Duvarı, Node.js için özel ağ erişimini engelliyorsa izin verilmesi gerekir.
 
 ## Komutlar
 
-```bash
-npm run dev                    # Geliştirme sunucusu
-npm run build                  # Production derlemesi
-npm run start                  # Production sunucusu
-npm run lint                   # ESLint kontrolü
-npm run test:recommendations   # Recommendation regression testleri
-npm run db:generate            # Drizzle migration dosyası oluşturma
-npm run db:migrate             # SQLite migration'larını uygulama
-npm run db:seed                # Idempotent seed işlemi
-```
+| Komut | Açıklama |
+| --- | --- |
+| `npm run dev` | Geliştirme sunucusu |
+| `npm run build` | Production derlemesi |
+| `npm run start` | Production sunucusu |
+| `npm run lint` | ESLint kontrolü |
+| `npx tsc --noEmit` | TypeScript kontrolü |
+| `npm run test:recommendations` | Recommendation regression testleri |
+| `npm run db:generate` | Yeni Drizzle migrationı üretir |
+| `npm run db:migrate` | SQLite migrationlarını uygular |
+| `npm run db:seed` | Tarif katalogunu idempotent şekilde yükler |
+
+## Veritabanı
+
+Çalışma zamanı veritabanı `data/aksam-ne-yesem.db` dosyasında tutulur. Bu dosya yereldir ve `.gitignore` ile repository dışında bırakılır. Yeni bir kurulumda migration ve seed komutlarını çalıştırmak yeterlidir.
+
+Seed katalogunda tarifler için slug, malzeme, miktar, adım, diyet, öğün, pişirme yöntemi, bütçe ve uygun olduğunda tahmini porsiyon maliyeti metadata'sı bulunur. Kalori ve protein alanları doğrulanmış veri yoksa boş bırakılır.
+
+## Yerel kullanıcı verileri
+
+Kimlik doğrulama olmadığı için favoriler, alışveriş listesi, haftalık plan, adım ilerlemesi, tema ve geçmiş tarayıcı `localStorage` alanında tutulur. Bu veriler başka bilgisayara otomatik taşınmaz.
 
 ## Proje yapısı
 
@@ -75,42 +106,21 @@ npm run db:seed                # Idempotent seed işlemi
 | `app/api/suggest/route.ts` | Öneri endpoint'i |
 | `app/api/recipe/route.ts` | Tarif detay endpoint'i |
 | `components/OneriClient.tsx` | Öneri ve tarif detay akışı |
-| `components/MalzemeGirisi.tsx` | Malzeme girişi ve hızlı seçimler |
-| `lib/db.ts` | SQLite + Drizzle bağlantısı |
-| `lib/recipe-repository.ts` | Tarif sorguları |
-| `lib/recommendations.ts` | Eşleşme, scoring ve filtreler |
-| `lib/recipe-mapper.ts` | Tarif ve miktar ölçekleme |
-| `db/schema.ts` | Veritabanı şeması |
-| `db/seed.ts` | Tarif kataloğu seed'i |
-| `scripts/test-recommendations.ts` | Recommendation regression testleri |
+| `components/TarifKarti.tsx` | Tarif detay kartı ve adım ilerlemesi |
+| `lib/recommendations.ts` | Eşleşme, scoring, filtreleme ve exclusion |
+| `lib/recipe-repository.ts` | SQLite tarif sorguları |
+| `lib/shopping.ts` | Alışveriş listesi store'u |
+| `lib/favorites.ts` | Favori tarif store'u |
+| `lib/week-plan.ts` | Haftalık plan store'u |
+| `db/schema.ts` | Drizzle SQLite şeması |
+| `db/seed.ts` | Tarif katalogu seed'i |
+| `drizzle/` | Veritabanı migrationları |
+| `scripts/test-recommendations.ts` | Regression testleri |
 
-## Test
+## Katkı
 
-Recommendation testlerini çalıştırın:
+Geliştirme kurulumu ve kontrol listesi için [CONTRIBUTING.md](CONTRIBUTING.md) dosyasına bakın. Her push ve pull request için GitHub Actions üzerinde lint, typecheck, database seed, recommendation testleri ve production build çalışır.
 
-```bash
-npm run test:recommendations
-```
+## Lisans
 
-Bu testler malzeme eşleşmesini, çoklu malzeme coverage sıralamasını, filtreleri, dışlama kurallarını ve porsiyon ölçeklemeyi kontrol eder.
-
-## Build
-
-Production derlemesini doğrulayın:
-
-```bash
-npm run build
-```
-
-## Veritabanı
-
-Uygulamanın çalışma zamanında kullandığı veritabanı, yerel SQLite dosyası `data/aksam-ne-yesem.db` konumundadır. Şema `db/schema.ts` ve migration dosyaları `drizzle/` altında tutulur.
-
-194 tariflik katalog `db/seed.ts` üzerinden oluşturulur. Yeni bir yerel veritabanı hazırlamak için migration ve seed komutlarını çalıştırabilirsiniz:
-
-```bash
-npm run db:migrate
-npm run db:seed
-```
-
-Bu işlem katalog verisini seed tanımlarından yeniden oluşturur.
+Bu repository için henüz bir lisans seçilmemiştir. Kullanım ve dağıtım koşulları belirlenene kadar kodu public bir projede yeniden dağıtmadan önce repository sahibiyle iletişime geçin.

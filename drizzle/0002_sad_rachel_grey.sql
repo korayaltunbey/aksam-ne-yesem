@@ -1,0 +1,1 @@
+ALTER TABLE `recipes` ADD `estimated_cost_per_serving` real;

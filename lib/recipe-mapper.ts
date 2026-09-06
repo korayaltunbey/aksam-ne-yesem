@@ -48,6 +48,19 @@ export function mapDatabaseRecipeToRecipe(
 
   return {
     name: recipe.name,
+    ...(recipe.mealType ? { mealType: recipe.mealType } : {}),
+    ...(recipe.cookingMethod ? { cookingMethod: recipe.cookingMethod } : {}),
+    ...(recipe.budgetLevel ? { budgetLevel: recipe.budgetLevel } : {}),
+    ...(recipe.estimatedCostPerServing !== null
+      ? { estimatedCostPerServing: recipe.estimatedCostPerServing }
+      : {}),
+    ...(recipe.caloriesPerServing !== null
+      ? { caloriesPerServing: recipe.caloriesPerServing }
+      : {}),
+    ...(recipe.proteinGrams !== null
+      ? { proteinGrams: recipe.proteinGrams }
+      : {}),
+    ...(recipe.isFreezerFriendly ? { isFreezerFriendly: true } : {}),
     timeMinutes: recipe.timeMinutes,
     difficulty: recipe.difficulty,
     servings,

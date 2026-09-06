@@ -24,38 +24,48 @@ export async function POST(request: Request) {
 
   try {
     let localSuggestions = getRecommendations({
-      ingredients: req.ingredients,
+      ingredients: req.mode === "dolap" ? req.ingredients : [],
       diet: req.diet,
+      mealType: req.mealType,
+      cookingMethod: req.cookingMethod,
+      budgetLevel: req.budgetLevel,
       maxTime: req.maxTime,
       cuisine: req.cuisine,
-      excludeNames: req.excludeNames,
+      excludeNames: [...req.excludeNames, ...req.excludeMadeNames],
       excludeIngredients: req.excludeIngredients,
       limit: SUGGEST_COUNT,
     });
 
     // Dolap modunda geçmişteki tüm öneriler uygun tarifleri dışladıysa,
-    // geçmişi yok sayarak güvenli bir geri dönüş yap.
+    // yalnızca öneri geçmişini yok say. "Yaptım, önerme" listesi korunur.
     if (
       req.mode === "dolap" &&
       localSuggestions.length === 0 &&
       req.excludeNames.length > 0
     ) {
       localSuggestions = getRecommendations({
-        ingredients: req.ingredients,
+        ingredients: req.mode === "dolap" ? req.ingredients : [],
         diet: req.diet,
+        mealType: req.mealType,
+        cookingMethod: req.cookingMethod,
+        budgetLevel: req.budgetLevel,
         maxTime: req.maxTime,
         cuisine: req.cuisine,
+        excludeNames: req.excludeMadeNames,
         excludeIngredients: req.excludeIngredients,
         limit: SUGGEST_COUNT,
       });
     }
 
     // OneriClient'in mevcut response contract'ını koru.
-    const suggestions = localSuggestions.map(({ name, type, reason }) => ({
-      name,
-      type,
-      reason,
-    }));
+    const suggestions = localSuggestions.map(
+      ({ name, type, reason, missingIngredientCount }) => ({
+        name,
+        type,
+        reason,
+        missingIngredientCount,
+      })
+    );
 
     return NextResponse.json({ suggestions, count: suggestions.length });
   } catch (err) {

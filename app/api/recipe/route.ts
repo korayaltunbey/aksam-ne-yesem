@@ -2,7 +2,14 @@
 
 import { NextResponse } from "next/server";
 import { findRecipes } from "@/lib/recipe-repository";
-import { getMissingIngredients, normalizeSearchText } from "@/lib/recommendations";
+import {
+  getMissingIngredients,
+  hasIngredientMatch,
+  isExcluded,
+  normalizeCuisine,
+  normalizeSearchText,
+  toDietCode,
+} from "@/lib/recommendations";
 import { mapDatabaseRecipeToRecipe } from "@/lib/recipe-mapper";
 import { parseRecipeRequest } from "@/lib/requests";
 
@@ -24,13 +31,36 @@ export async function POST(request: Request) {
 
   try {
     const normalizedDishName = normalizeSearchText(dishName);
-    const recipe = findRecipes().find(
+    const recipe = findRecipes({
+      maxTime: req.maxTime,
+      cuisine: normalizeCuisine(req.cuisine),
+      diet: toDietCode(req.diet),
+      mealType: req.mealType,
+      cookingMethod: req.cookingMethod,
+      budgetLevel: req.budgetLevel,
+    }).find(
       (candidate) => normalizeSearchText(candidate.name) === normalizedDishName
     );
 
     if (!recipe) {
       return NextResponse.json(
         { error: "Seçilen tarif bulunamadı." },
+        { status: 404 }
+      );
+    }
+
+    if (
+      (req.mode === "dolap" && !hasIngredientMatch(recipe, req.ingredients)) ||
+      isExcluded(
+        recipe,
+        new Set(
+          [...req.excludeNames, ...req.excludeMadeNames].map(normalizeSearchText)
+        ),
+        new Set(req.excludeIngredients.map(normalizeSearchText))
+      )
+    ) {
+      return NextResponse.json(
+        { error: "Seçilen tarif mevcut tercihlerine uygun değil." },
         { status: 404 }
       );
     }

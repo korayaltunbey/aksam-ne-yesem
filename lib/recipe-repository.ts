@@ -28,6 +28,13 @@ export interface DatabaseRecipe {
   name: string;
   category: string;
   cuisine: string | null;
+  mealType: string | null;
+  cookingMethod: string | null;
+  budgetLevel: string | null;
+  estimatedCostPerServing: number | null;
+  caloriesPerServing: number | null;
+  proteinGrams: number | null;
+  isFreezerFriendly: boolean;
   timeMinutes: number;
   difficulty: Difficulty;
   baseServings: number;
@@ -41,6 +48,9 @@ export interface RecipeSearchFilters {
   maxTime?: number | null;
   cuisine?: string;
   diet?: string;
+  mealType?: string;
+  cookingMethod?: string;
+  budgetLevel?: string;
 }
 
 function loadRecipe(id: number): DatabaseRecipe | null {
@@ -51,6 +61,13 @@ function loadRecipe(id: number): DatabaseRecipe | null {
       name: recipes.name,
       category: recipes.category,
       cuisine: recipes.cuisine,
+      mealType: recipes.mealType,
+      cookingMethod: recipes.cookingMethod,
+      budgetLevel: recipes.budgetLevel,
+      estimatedCostPerServing: recipes.estimatedCostPerServing,
+      caloriesPerServing: recipes.caloriesPerServing,
+      proteinGrams: recipes.proteinGrams,
+      isFreezerFriendly: recipes.isFreezerFriendly,
       timeMinutes: recipes.timeMinutes,
       difficulty: recipes.difficulty,
       baseServings: recipes.baseServings,
@@ -129,6 +146,18 @@ export function findRecipes(
 
   if (filters.cuisine) {
     conditions.push(eq(recipes.cuisine, filters.cuisine));
+  }
+
+  if (filters.mealType) {
+    conditions.push(eq(recipes.mealType, filters.mealType));
+  }
+
+  if (filters.cookingMethod) {
+    conditions.push(eq(recipes.cookingMethod, filters.cookingMethod));
+  }
+
+  if (filters.budgetLevel) {
+    conditions.push(eq(recipes.budgetLevel, filters.budgetLevel));
   }
 
   if (filters.diet) {

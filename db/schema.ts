@@ -18,6 +18,15 @@ export const recipes = sqliteTable(
     name: text("name").notNull(),
     category: text("category").notNull(),
     cuisine: text("cuisine"),
+    mealType: text("meal_type"),
+    cookingMethod: text("cooking_method"),
+    budgetLevel: text("budget_level"),
+    estimatedCostPerServing: real("estimated_cost_per_serving"),
+    caloriesPerServing: integer("calories_per_serving"),
+    proteinGrams: real("protein_grams"),
+    isFreezerFriendly: integer("is_freezer_friendly", { mode: "boolean" })
+      .notNull()
+      .default(false),
     timeMinutes: integer("time_minutes").notNull(),
     difficulty: text("difficulty").notNull(),
     baseServings: integer("base_servings").notNull(),
@@ -33,6 +42,12 @@ export const recipes = sqliteTable(
     uniqueIndex("recipes_slug_unique").on(table.slug),
     index("recipes_active_category_idx").on(table.isActive, table.category),
     index("recipes_active_cuisine_idx").on(table.isActive, table.cuisine),
+    index("recipes_active_meal_type_idx").on(table.isActive, table.mealType),
+    index("recipes_active_cooking_method_idx").on(
+      table.isActive,
+      table.cookingMethod
+    ),
+    index("recipes_active_budget_idx").on(table.isActive, table.budgetLevel),
     index("recipes_active_time_idx").on(table.isActive, table.timeMinutes),
     check("recipes_time_positive", sql`${table.timeMinutes} > 0`),
     check("recipes_servings_positive", sql`${table.baseServings} > 0`),

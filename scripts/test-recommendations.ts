@@ -4,6 +4,7 @@ import { getRecipeById, findRecipes } from "@/lib/recipe-repository";
 import {
   getRecommendations,
   normalizeSearchText,
+  toDietCode,
 } from "@/lib/recommendations";
 import { mapDatabaseRecipeToRecipe } from "@/lib/recipe-mapper";
 
@@ -27,7 +28,9 @@ function assertRecipeFilters(
 ) {
   for (const suggestion of suggestions) {
     const recipe = recipeFor(suggestion.name);
-    if (filters.diet) assert.ok(recipe.diets.includes("vegetarian"));
+    if (filters.diet) {
+      assert.ok(recipe.diets.includes(toDietCode(filters.diet) ?? ""));
+    }
     if (filters.cuisine) assert.equal(recipe.cuisine, "Türk Mutfağı");
     if (filters.maxTime) assert.ok(recipe.timeMinutes <= filters.maxTime);
   }
@@ -71,6 +74,23 @@ assert.ok(fullCoverageIndex < partialCoverageIndex);
 assert.ok(
   peaTomatoSuggestions.every((item) => item.ingredientCoverage > 0)
 );
+assert.ok(
+  peaTomatoSuggestions.every(
+    (item) => item.missingIngredientCount >= 0
+  )
+);
+for (let index = 1; index < peaTomatoSuggestions.length; index += 1) {
+  const previous = peaTomatoSuggestions[index - 1];
+  const current = peaTomatoSuggestions[index];
+  if (
+    previous.ingredientCoverage === current.ingredientCoverage &&
+    previous.matchScore === current.matchScore
+  ) {
+    assert.ok(
+      previous.missingIngredientCount <= current.missingIngredientCount
+    );
+  }
+}
 
 const chickenSuggestions = getRecommendations({ ingredients: ["tavuk"] });
 assert.ok(chickenSuggestions.length > 0);
@@ -94,6 +114,13 @@ const vegetarianSuggestions = getRecommendations({
   diet: "Vejetaryen",
 });
 assertRecipeFilters(vegetarianSuggestions, { diet: "Vejetaryen" });
+
+const veganSuggestions = getRecommendations({
+  ingredients: ["mercimek"],
+  diet: "Vegan",
+});
+assert.ok(veganSuggestions.length > 0);
+assertRecipeFilters(veganSuggestions, { diet: "Vegan" });
 
 // C: Cuisine hard filter; seed'de yalnızca Türk Mutfağı var.
 const turkishSuggestions = getRecommendations({
@@ -173,6 +200,7 @@ const menemen = getRecipeById(1);
 assert.ok(menemen);
 const fourServingRecipe = mapDatabaseRecipeToRecipe(menemen, { servings: 4 });
 const tenServingRecipe = mapDatabaseRecipeToRecipe(menemen, { servings: 10 });
+assert.equal(tenServingRecipe.estimatedCostPerServing, 35);
 assert.equal(
   fourServingRecipe.ingredients.find((item) => item.name === "Yumurta")?.amount,
   "8 adet"

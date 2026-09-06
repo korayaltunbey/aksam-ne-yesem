@@ -28,6 +28,27 @@ import {
   subscribeSuggested,
   clearSuggested,
 } from "@/lib/suggested";
+import {
+  clearShoppingList,
+  getShoppingServerSnapshot,
+  getShoppingSnapshot,
+  removeShoppingItem,
+  subscribeShopping,
+  toggleShoppingItem,
+} from "@/lib/shopping";
+import {
+  getFavoritesServerSnapshot,
+  getFavoritesSnapshot,
+  removeFavorite,
+  subscribeFavorites,
+} from "@/lib/favorites";
+import {
+  getPlanServerSnapshot,
+  getPlanSnapshot,
+  PLAN_DAYS,
+  removePlannedRecipe,
+  subscribePlan,
+} from "@/lib/week-plan";
 
 // Bölüm başlıklarını küçük, renkli etiketler halinde gösterir
 function SectionLabel({
@@ -57,6 +78,21 @@ export default function HomePage() {
     subscribeSuggested,
     getSuggestedSnapshot,
     getSuggestedServerSnapshot
+  );
+  const shoppingItems = useSyncExternalStore(
+    subscribeShopping,
+    getShoppingSnapshot,
+    getShoppingServerSnapshot
+  );
+  const favorites = useSyncExternalStore(
+    subscribeFavorites,
+    getFavoritesSnapshot,
+    getFavoritesServerSnapshot
+  );
+  const plannedRecipes = useSyncExternalStore(
+    subscribePlan,
+    getPlanSnapshot,
+    getPlanServerSnapshot
   );
   // "Yaptığım yemekler" ekleme kutusunun metni
   const [madeDraft, setMadeDraft] = useState("");
@@ -193,6 +229,137 @@ export default function HomePage() {
           </p>
         </section>
       )}
+
+      {shoppingItems.length > 0 && (
+        <section className="mt-12">
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <SectionLabel color="text-sky-600 dark:text-sky-400">
+              Alışveriş Listesi
+            </SectionLabel>
+            <button
+              onClick={clearShoppingList}
+              className="ml-auto rounded-lg border border-stone-300 px-2.5 py-1 text-[11px] font-semibold text-stone-500 transition hover:border-red-500 hover:text-red-600 dark:border-stone-700 dark:text-stone-400 dark:hover:border-red-600 dark:hover:text-red-400"
+            >
+              Listeyi Temizle
+            </button>
+          </div>
+          <ul className="space-y-2">
+            {shoppingItems.map((item) => (
+              <li
+                key={item.name}
+                className={`flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 dark:border-stone-800 dark:bg-stone-900 ${
+                  item.checked ? "opacity-60" : ""
+                }`}
+              >
+                <input
+                  type="checkbox"
+                  checked={item.checked}
+                  onChange={() => toggleShoppingItem(item.name)}
+                  aria-label={`${item.name} alındı`}
+                  className="h-4 w-4 accent-sky-600"
+                />
+                <span className={`min-w-0 flex-1 text-sm ${item.checked ? "line-through" : ""}`}>
+                  {item.name}
+                </span>
+                <span className="text-xs text-stone-500 dark:text-stone-400">
+                  {item.amount}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => removeShoppingItem(item.name)}
+                  aria-label={`${item.name} alışveriş listesinden kaldır`}
+                  className="rounded px-2 py-1 text-stone-400 transition hover:bg-stone-100 hover:text-red-600 dark:hover:bg-stone-800 dark:hover:text-red-400"
+                >
+                  &times;
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {favorites.length > 0 && (
+        <section className="mt-12">
+          <div className="mb-3 flex items-center gap-2">
+            <SectionLabel color="text-sky-600 dark:text-sky-400">
+              Favorilerim
+            </SectionLabel>
+          </div>
+          <ul className="space-y-3">
+            {favorites.map((item) => (
+              <li key={item.id} className={`flex items-center gap-3 p-3.5 ${CARD}`}>
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-sky-50 text-base dark:bg-sky-950/50">
+                  &#9733;
+                </span>
+                <Link
+                  href={`/oneri?mode=bana&favorite=${encodeURIComponent(item.recipe.name)}`}
+                  className="min-w-0 flex-1"
+                >
+                  <p className="truncate text-sm font-bold text-stone-900 dark:text-stone-100">
+                    {item.recipe.name}
+                  </p>
+                  <p className="text-[11px] text-stone-500 dark:text-stone-400">
+                    {item.recipe.servings} kişilik &middot; {item.recipe.timeMinutes} dk
+                  </p>
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => removeFavorite(item.recipe.name)}
+                  aria-label={`${item.recipe.name} favorilerden kaldır`}
+                  className="rounded px-2 py-1 text-stone-400 transition hover:bg-stone-100 hover:text-red-600 dark:hover:bg-stone-800 dark:hover:text-red-400"
+                >
+                  &times;
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section className="mt-12">
+        <div className="mb-3 flex items-center gap-2">
+          <SectionLabel color="text-violet-600 dark:text-violet-400">
+            Haftalık Plan
+          </SectionLabel>
+        </div>
+        <ul className="space-y-2">
+          {PLAN_DAYS.map((day) => {
+            const planned = plannedRecipes.find((item) => item.day === day);
+            return (
+              <li
+                key={day}
+                className="flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 dark:border-stone-800 dark:bg-stone-900"
+              >
+                <span className="w-20 shrink-0 text-xs font-bold text-stone-500 dark:text-stone-400">
+                  {day}
+                </span>
+                {planned ? (
+                  <>
+                    <span className="min-w-0 flex-1 truncate text-sm font-semibold text-stone-900 dark:text-stone-100">
+                      {planned.recipe.name}
+                    </span>
+                    <span className="text-[11px] text-stone-500 dark:text-stone-400">
+                      {planned.recipe.servings} kişi
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removePlannedRecipe(day)}
+                      aria-label={`${day} planını kaldır`}
+                      className="rounded px-2 py-1 text-stone-400 transition hover:bg-stone-100 hover:text-red-600 dark:hover:bg-stone-800 dark:hover:text-red-400"
+                    >
+                      &times;
+                    </button>
+                  </>
+                ) : (
+                  <span className="text-xs text-stone-400 dark:text-stone-500">
+                    Henüz tarif eklenmedi
+                  </span>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </section>
 
       {/* Kaydedilen tariflerin geçmişi */}
       {history.length > 0 && (

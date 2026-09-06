@@ -11,6 +11,9 @@ const DEFAULT_LIMIT = 5;
 export interface RecommendationRequest {
   ingredients?: string[];
   diet?: string;
+  mealType?: string;
+  cookingMethod?: string;
+  budgetLevel?: string;
   maxTime?: number | null;
   cuisine?: string;
   excludeNames?: string[];
@@ -24,6 +27,7 @@ export interface LocalDishSuggestion extends DishSuggestion {
   ingredientCoverage: number;
   matchedIngredientCount: number;
   matchScore: number;
+  missingIngredientCount: number;
 }
 
 const DIET_ALIASES: Record<string, string> = {
@@ -102,13 +106,13 @@ function ingredientMatches(
   );
 }
 
-function toDietCode(value: string | undefined): string | undefined {
+export function toDietCode(value: string | undefined): string | undefined {
   if (!value?.trim()) return undefined;
   const normalized = normalizeSearchText(value);
   return DIET_ALIASES[normalized] || normalized;
 }
 
-function normalizeCuisine(value: string | undefined): string | undefined {
+export function normalizeCuisine(value: string | undefined): string | undefined {
   if (!value?.trim()) return undefined;
   return normalizeSearchText(value) === normalizeSearchText("Türk Mutfağı")
     ? "Türk Mutfağı"
@@ -145,9 +149,15 @@ function calculateMatch(
   ingredientCoverage: number;
   matchedIngredientCount: number;
   matchScore: number;
+  missingIngredientCount: number;
 } {
   if (userIngredients.size === 0) {
-    return { ingredientCoverage: 0, matchedIngredientCount: 0, matchScore: 0 };
+    return {
+      ingredientCoverage: 0,
+      matchedIngredientCount: 0,
+      matchScore: 0,
+      missingIngredientCount: 0,
+    };
   }
 
   const ingredientCoverage = userIngredientValues.filter((userIngredient) => {
@@ -171,10 +181,15 @@ function calculateMatch(
       ? 0
       : matchedRequiredCount / requiredIngredients.length;
 
-  return { ingredientCoverage, matchedIngredientCount, matchScore };
+  return {
+    ingredientCoverage,
+    matchedIngredientCount,
+    matchScore,
+    missingIngredientCount: requiredIngredients.length - matchedRequiredCount,
+  };
 }
 
-function isExcluded(
+export function isExcluded(
   recipe: DatabaseRecipe,
   excludeNames: Set<string>,
   excludeIngredients: Set<string>
@@ -187,13 +202,28 @@ function isExcluded(
   );
 }
 
+export function hasIngredientMatch(
+  recipe: DatabaseRecipe,
+  userIngredients: string[]
+): boolean {
+  const userIngredientKeys = buildIngredientKeySet(userIngredients);
+  return recipe.ingredients.some((ingredient) =>
+    ingredientMatches(userIngredientKeys, ingredient)
+  );
+}
+
 function buildReason(
   recipe: DatabaseRecipe,
   matchedIngredientCount: number,
+  missingIngredientCount: number,
   hasIngredientFilter: boolean
 ): string {
   if (hasIngredientFilter && matchedIngredientCount > 0) {
-    return `${matchedIngredientCount} malzemen elinde var`;
+    const missingText =
+      missingIngredientCount > 0
+        ? `, ${missingIngredientCount} temel malzeme eksik olabilir`
+        : "";
+    return `${matchedIngredientCount} malzemen elinde var${missingText}`;
   }
 
   return `${recipe.category} kategorisinden uygun bir tarif`;
@@ -225,6 +255,9 @@ export function getRecommendations(
     maxTime: request.maxTime ?? null,
     cuisine: normalizeCuisine(request.cuisine),
     diet: toDietCode(request.diet),
+    mealType: request.mealType?.trim() || undefined,
+    cookingMethod: request.cookingMethod?.trim() || undefined,
+    budgetLevel: request.budgetLevel?.trim() || undefined,
   };
 
   const recipes = findRecipes(filters);
@@ -245,22 +278,39 @@ export function getRecommendations(
       ({ matchedIngredientCount }) =>
         !hasIngredientFilter || matchedIngredientCount > 0
     )
-    .map(({ recipe, ingredientCoverage, matchedIngredientCount, matchScore }) => ({
+    .map(
+      ({
+        recipe,
+        ingredientCoverage,
+        matchedIngredientCount,
+        matchScore,
+        missingIngredientCount,
+      }) => ({
       id: recipe.id,
       slug: recipe.slug,
       name: recipe.name,
       type: recipe.category,
-      reason: buildReason(recipe, matchedIngredientCount, hasIngredientFilter),
+      reason: buildReason(
+        recipe,
+        matchedIngredientCount,
+        missingIngredientCount,
+        hasIngredientFilter
+      ),
       ingredientCoverage,
       matchedIngredientCount,
       matchScore,
+      missingIngredientCount,
       timeMinutes: recipe.timeMinutes,
-    }))
+      })
+    )
     .sort((a, b) => {
       if (hasIngredientFilter && b.ingredientCoverage !== a.ingredientCoverage) {
         return b.ingredientCoverage - a.ingredientCoverage;
       }
       if (b.matchScore !== a.matchScore) return b.matchScore - a.matchScore;
+      if (a.missingIngredientCount !== b.missingIngredientCount) {
+        return a.missingIngredientCount - b.missingIngredientCount;
+      }
       if (b.matchedIngredientCount !== a.matchedIngredientCount) {
         return b.matchedIngredientCount - a.matchedIngredientCount;
       }
@@ -277,5 +327,7 @@ export function getRecommendations(
       ingredientCoverage: suggestion.ingredientCoverage,
       matchedIngredientCount: suggestion.matchedIngredientCount,
       matchScore: suggestion.matchScore,
+      missingIngredientCount: suggestion.missingIngredientCount,
+      timeMinutes: suggestion.timeMinutes,
     }));
 }
