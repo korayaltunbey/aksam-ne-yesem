@@ -24,10 +24,10 @@ Elindeki malzemelere, damak tercihine ve ayırabileceğin zamana göre yemek ön
 
 ## Gereksinimler
 
-- Node.js 22 veya daha yeni bir sürüm
+- Node.js 22.x
 - npm
 
-`better-sqlite3` native bir Node modülüdür. Windows'ta hazır binary kullanılamazsa Visual Studio'nun **Desktop development with C++** workload'u gerekebilir.
+`better-sqlite3` native bir Node modülüdür. Proje Node.js 22.x ile doğrulanır; Node.js 24 Windows kurulumunda hazır binary bulunamazsa Visual Studio'nun **Desktop development with C++** workload'u gerekebilir. En kolay yol `.nvmrc` dosyasındaki Node 22 sürümünü kullanmaktır.
 
 ## Kurulum
 

@@ -4,7 +4,7 @@ Akşam Ne Yesem? katkılarına açıktır. Büyük değişikliklerden önce issu
 
 ## Geliştirme kurulumu
 
-1. Node.js 22 veya daha yeni bir sürüm kullanın.
+1. Node.js 22.x kullanın. `.nvmrc` dosyası bu sürümü belirtir.
 2. Bağımlılıkları kurun: `npm ci`
 3. Yerel SQLite veritabanını hazırlayın:
 
