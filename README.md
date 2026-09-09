@@ -28,7 +28,7 @@ Uygulamayı Chrome ya da Edge ile açtıktan sonra tarayıcı menüsünden **Uyg
 
 Hesap sistemi bulunmaz. Favoriler, alışveriş listesi, haftalık plan, tema ve geçmiş yalnızca kullandığın tarayıcının `localStorage` alanında saklanır. Başka bir cihazda otomatik görünmezler.
 
-## Sıfır bilgisayarda Docker ile kurulum
+## Docker ile kurulum
 
 Bu yöntem Windows, macOS veya Linux'ta projeyi Docker konteyneri içinde çalıştırır.
 
