@@ -63,12 +63,6 @@ export default function TarifKarti({ recipe }: TarifKartiProps) {
     return () => window.clearInterval(timer);
   }, [timerSeconds]);
 
-  useEffect(() => {
-    setCookingMode(false);
-    setActiveStep(0);
-    setTimerSeconds(0);
-  }, [recipe.name]);
-
   const currentStep = recipe.steps[activeStep] ?? recipe.steps[0];
   const suggestedMinutes = currentStep ? findStepMinutes(currentStep) : null;
 

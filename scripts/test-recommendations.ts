@@ -46,6 +46,22 @@ assert.ok(
     )
   )
 );
+const twoServingPerdePilavi = mapDatabaseRecipeToRecipe(perdePilavi, {
+  servings: 2,
+});
+assert.equal(
+  twoServingPerdePilavi.ingredients.find((item) => item.name === "Pirinç")?.amount,
+  "¾ su bardağı"
+);
+assert.equal(
+  twoServingPerdePilavi.ingredients.find((item) => item.name === "Toz biber")?.amount,
+  "¼ tatlı kaşığı"
+);
+assert.ok(
+  twoServingPerdePilavi.ingredients.every(
+    (item) => !/(?:0,\d{2}|0\.\d{2})/.test(item.amount)
+  )
+);
 
 const volumeRecipe = catalogRecipes.find((recipe) =>
   recipe.ingredients.some((ingredient) =>

@@ -12,6 +12,16 @@ function formatNumber(value: number): string {
   });
 }
 
+function formatKitchenFraction(value: number): string {
+  const rounded = Math.max(0.25, Math.round(value * 4) / 4);
+  const whole = Math.floor(rounded);
+  const quarter = Math.round((rounded - whole) * 4);
+  const fraction = ["", "¼", "½", "¾"][quarter] ?? "";
+
+  if (whole === 0) return fraction || "¼";
+  return `${whole}${fraction}`;
+}
+
 function formatAmount(
   quantity: number | null,
   unit: string,
@@ -25,14 +35,20 @@ function formatAmount(
   // Sıvı miktarlarını tarif ekranında daha pratik mutfak ölçüleriyle göster.
   if (unit === "mililitre" || unit === "ml") {
     const glasses = Math.round((scaledQuantity / 200) * 100) / 100;
-    if (glasses >= 1) return `${formatNumber(glasses)} su bardağı`;
+    if (glasses >= 1) return `${formatKitchenFraction(glasses)} su bardağı`;
 
     const teaGlasses = Math.round((scaledQuantity / 100) * 100) / 100;
-    return `${formatNumber(teaGlasses)} çay bardağı`;
+    return `${formatKitchenFraction(teaGlasses)} çay bardağı`;
   }
 
   if (unit === "litre") {
-    return `${formatNumber(scaledQuantity * 5)} su bardağı`;
+    return `${formatKitchenFraction(scaledQuantity * 5)} su bardağı`;
+  }
+
+  if (
+    ["adet", "diş", "su bardağı", "çay bardağı", "yemek kaşığı", "tatlı kaşığı", "çay kaşığı"].includes(unit)
+  ) {
+    return `${formatKitchenFraction(scaledQuantity)} ${unit}`;
   }
 
   return `${formatNumber(scaledQuantity)} ${unit}`;
