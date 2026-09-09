@@ -31,6 +31,7 @@ export interface Recipe {
   ingredients: RecipeIngredient[]; // ölçülü malzeme listesi
   steps: string[]; // adım adım hazırlanış
   missingIngredients: string[]; // dolap modunda kullanıcıda olmayan tamamlayıcılar
+  matchedIngredients?: string[]; // dolaptaki malzemelerden eşleşenler
   note?: string; // isteğe bağlı ipucu notu
 }
 

@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { findRecipes } from "@/lib/recipe-repository";
 import {
   getMissingIngredients,
+  getMatchedIngredientNames,
   hasIngredientMatch,
   isExcluded,
   normalizeCuisine,
@@ -74,7 +75,14 @@ export async function POST(request: Request) {
       missingIngredients,
     });
 
-    return NextResponse.json({ recipe: mappedRecipe });
+    const matchedIngredients =
+      req.mode === "dolap"
+        ? getMatchedIngredientNames(recipe, req.ingredients)
+        : [];
+
+    return NextResponse.json({
+      recipe: { ...mappedRecipe, matchedIngredients },
+    });
   } catch (err) {
     console.error("Yerel tarif yüklenirken hata:", err);
     return NextResponse.json(

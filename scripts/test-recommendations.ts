@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { getRecipeById, findRecipes } from "@/lib/recipe-repository";
 import {
   getRecommendations,
+  getMatchedIngredientNames,
   normalizeSearchText,
   toDietCode,
 } from "@/lib/recommendations";
@@ -134,6 +135,9 @@ assert.ok(chickenSuggestions.length > 0);
 assert.ok(
   chickenSuggestions.every((item) => item.matchedIngredientCount > 0)
 );
+
+const broccoliSoup = recipeFor("Brokoli Çorbası");
+assert.ok(getMatchedIngredientNames(broccoliSoup, ["brokoli"]).includes("Brokoli"));
 
 // Pozitif ingredient eşleşmesi ve basit çoğul varyasyonu.
 const tomatoSuggestions = getRecommendations({ ingredients: ["domates"] });

@@ -31,17 +31,44 @@ function normalize(value: string): string {
   return value.trim().toLocaleLowerCase("tr-TR");
 }
 
+function combineAmounts(current: string, added: string): string {
+  const amountPattern = /^([0-9]+(?:[.,][0-9]+)?)\s+(.+)$/;
+  const currentMatch = current.trim().match(amountPattern);
+  const addedMatch = added.trim().match(amountPattern);
+
+  if (!currentMatch || !addedMatch || normalize(currentMatch[2]) !== normalize(addedMatch[2])) {
+    return current;
+  }
+
+  const currentQuantity = Number(currentMatch[1].replace(",", "."));
+  const addedQuantity = Number(addedMatch[1].replace(",", "."));
+  if (!Number.isFinite(currentQuantity) || !Number.isFinite(addedQuantity)) return current;
+
+  const total = Math.round((currentQuantity + addedQuantity) * 100) / 100;
+  return `${total.toLocaleString("tr-TR", { maximumFractionDigits: 2 })} ${currentMatch[2]}`;
+}
+
 export function addShoppingItems(items: ShoppingItem[]): void {
   const current = store.getSnapshot();
-  const existing = new Set(current.map((item) => normalize(item.name)));
-  const additions = items.filter((item) => {
-    const key = normalize(item.name);
-    if (!key || existing.has(key)) return false;
-    existing.add(key);
-    return true;
-  });
+  const next = [...current];
 
-  if (additions.length > 0) store.write([...current, ...additions]);
+  for (const item of items) {
+    const key = normalize(item.name);
+    if (!key) continue;
+    const existingIndex = next.findIndex((candidate) => normalize(candidate.name) === key);
+    if (existingIndex === -1) {
+      next.push(item);
+      continue;
+    }
+
+    const existing = next[existingIndex];
+    next[existingIndex] = {
+      ...existing,
+      amount: combineAmounts(existing.amount, item.amount),
+    };
+  }
+
+  store.write(next);
 }
 
 export function toggleShoppingItem(name: string): void {

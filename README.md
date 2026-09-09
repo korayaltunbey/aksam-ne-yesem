@@ -18,8 +18,10 @@ Uygulamayı Chrome ya da Edge ile açtıktan sonra tarayıcı menüsünden **Uyg
 - Kişi sayısına göre otomatik miktar ölçekleme
 - Diyet, toplam süre, mutfak/yöre, öğün, pişirme yöntemi ve bütçe filtreleri
 - Seçili tercihlere uygun sonuç vermeyecek filtre seçeneklerini pasif gösterme
-- Eksik malzemeleri gösterme ve alışveriş listesine ekleme
-- Favoriler, haftalık yemek planı, adım takibi ve tarif kopyalama
+- Eşleşen ve eksik malzemeleri açıklama; eksik malzemeler için alternatif önerileri
+- Eksik malzeme listesini tek tuşla kopyalama ve alışveriş listesine ekleme
+- Tekrarlanan malzemeleri miktarlarıyla birleştiren alışveriş listesi
+- Favoriler, haftalık yemek planı, adım takibi, pişirme modu ve tarif kopyalama
 - Aynı tarifleri tekrar önermeme ve “yaptım” listesi
 - Açık/koyu tema
 - 256 tariflik yerel SQLite kataloğu

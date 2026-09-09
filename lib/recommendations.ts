@@ -141,6 +141,18 @@ export function getMissingIngredients(
     .map((ingredient) => ingredient.name);
 }
 
+export function getMatchedIngredientNames(
+  recipe: DatabaseRecipe,
+  userIngredients: string[]
+): string[] {
+  const userIngredientSet = buildIngredientKeySet(userIngredients);
+  if (userIngredientSet.size === 0) return [];
+
+  return recipe.ingredients
+    .filter((ingredient) => ingredientMatches(userIngredientSet, ingredient))
+    .map((ingredient) => ingredient.name);
+}
+
 function calculateMatch(
   recipe: DatabaseRecipe,
   userIngredientValues: string[],
