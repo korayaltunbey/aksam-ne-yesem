@@ -1370,7 +1370,7 @@ const curatedCatalogV2: SeedRecipe[] = [
     baseServings: 4,
     diets: ["gluten_free", "low_carb"],
     ingredients: [
-      ingredient("Tavuk göğsü", 600, "gram"),
+      ingredient("Tavuk göğsü", 2, "adet"),
       ingredient("Patates", 3, "adet"),
       ingredient("Havuç", 2, "adet"),
       ingredient("Kırmızı biber", 1, "adet"),
@@ -1380,11 +1380,13 @@ const curatedCatalogV2: SeedRecipe[] = [
       ingredient("Tuz", null, "tutam", { quantityText: "yeteri kadar" }),
     ],
     steps: [
-      "Tavuk ve sebzeleri iri parçalar halinde doğra.",
-      "Zeytinyağı, kekik ve tuzla harmanla.",
-      "Fırın tepsisine yayıp 200 derecede sebzeler yumuşayana kadar pişir.",
-      "Sıcak servis et.",
+      "Fırını 200 derece alt-üst ayarda ısıtmaya başla. Patatesleri kabuklarını soyup yaklaşık iki parmak kalınlığında doğra; havucu verev, kırmızı biberi iri, soğanı elma dilimi şeklinde kes.",
+      "Tavuk göğsünü iri kuşbaşı doğra. Tavuk ve sebzeleri geniş bir kapta birleştir; 3 yemek kaşığı zeytinyağı, 1 çay kaşığı kekik ve tuzu her tarafına gelecek şekilde karıştır.",
+      "Karışımı tek kat halinde fırın tepsisine yay. Tepsiyi önceden ısınmış fırının orta rafına koyup 25 dakika pişir.",
+      "25 dakikanın sonunda sebzeleri ve tavukları spatulayla çevir. Tepsiyi tekrar fırına verip patatesler çatal batınca yumuşayana ve tavuğun içi pembe kalmayana kadar 15-20 dakika daha pişir.",
+      "Tepsiyi fırından alıp 5 dakika dinlendir. Sıcak servis et; istersen yanında yoğurtla sun.",
     ],
+    note: "Tepsiyi tek kat doldurmak sebzelerin buharda kalmasını önler ve daha iyi kızarmalarını sağlar.",
   },
   {
     slug: "kinoa-nohut-salatasi",

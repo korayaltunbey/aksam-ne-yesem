@@ -51,17 +51,57 @@ const twoServingPerdePilavi = mapDatabaseRecipeToRecipe(perdePilavi, {
 });
 assert.equal(
   twoServingPerdePilavi.ingredients.find((item) => item.name === "Pirinç")?.amount,
-  "¾ su bardağı"
+  "yarım + çeyrek su bardağı"
 );
 assert.equal(
   twoServingPerdePilavi.ingredients.find((item) => item.name === "Toz biber")?.amount,
-  "¼ tatlı kaşığı"
+  "çeyrek tatlı kaşığı"
 );
 assert.ok(
   twoServingPerdePilavi.ingredients.every(
-    (item) => !/(?:0,\d{2}|0\.\d{2})/.test(item.amount)
+    (item) => !/(?:0,\d{2}|0\.\d{2}|¼|½|¾)/.test(item.amount)
   )
 );
+
+const fırındaSebzeliTavuk = recipeFor("Fırında Sebzeli Tavuk");
+const twoServingFırındaSebzeliTavuk = mapDatabaseRecipeToRecipe(
+  fırındaSebzeliTavuk,
+  { servings: 2 }
+);
+assert.equal(
+  twoServingFırındaSebzeliTavuk.ingredients.find(
+    (item) => item.name === "Tavuk göğsü"
+  )?.amount,
+  "1 adet"
+);
+assert.ok(twoServingFırındaSebzeliTavuk.steps.length >= 6);
+assert.ok(
+  twoServingFırındaSebzeliTavuk.steps.some((step) => step.includes("200 derece"))
+);
+assert.ok(
+  twoServingFırındaSebzeliTavuk.steps.some((step) => step.includes("pembe kalmayana"))
+);
+assert.ok(
+  twoServingFırındaSebzeliTavuk.note?.includes("tek kat doldurmak")
+);
+assert.equal(
+  twoServingFırındaSebzeliTavuk.ingredients.find(
+    (item) => item.name === "Patates"
+  )?.amount,
+  "1 tam + yarım adet"
+);
+
+for (const recipe of catalogRecipes) {
+  const practicalRecipe = mapDatabaseRecipeToRecipe(recipe, {
+    servings: Math.max(1, Math.round(recipe.baseServings / 2)),
+  });
+  assert.ok(
+    practicalRecipe.ingredients.every(
+      (item) => !/(?:0,\d{2}|0\.\d{2}|¼|½|¾)/.test(item.amount)
+    ),
+    `${recipe.name} tarifinde matematiksel kesir kaldı`
+  );
+}
 
 const volumeRecipe = catalogRecipes.find((recipe) =>
   recipe.ingredients.some((ingredient) =>

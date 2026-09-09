@@ -16,13 +16,22 @@ function formatKitchenFraction(value: number): string {
   const rounded = Math.max(0.25, Math.round(value * 4) / 4);
   const whole = Math.floor(rounded);
   const quarter = Math.round((rounded - whole) * 4);
-  const fraction = ["", "¼", "½", "¾"][quarter] ?? "";
+  const fraction = ["", "çeyrek", "yarım", "yarım + çeyrek"][quarter] ?? "";
 
-  if (whole === 0) return fraction || "¼";
-  return `${whole}${fraction}`;
+  if (whole === 0) return fraction || "çeyrek";
+  if (!fraction) return String(whole);
+  return `${whole} tam + ${fraction}`;
+}
+
+function formatProteinPiece(value: number): string {
+  const rounded = Math.max(0.5, Math.ceil(value * 2) / 2);
+  if (rounded === 0.5) return "yarım";
+  if (Number.isInteger(rounded)) return String(rounded);
+  return `${Math.floor(rounded)} tam + yarım`;
 }
 
 function formatAmount(
+  ingredientName: string,
   quantity: number | null,
   unit: string,
   quantityText: string | null,
@@ -31,6 +40,23 @@ function formatAmount(
   if (quantity === null) return quantityText || unit;
 
   const scaledQuantity = Math.round(quantity * multiplier * 100) / 100;
+
+  // Tavuk göğsü alışverişte genellikle parça ile alınır; gram yerine bu
+  // ölçünün gösterilmesi tarifi mutfakta daha hızlı uygulanabilir kılar.
+  if (ingredientName === "Tavuk göğsü" || ingredientName === "Tavuk") {
+    const pieceCount = unit === "gram" ? scaledQuantity / 300 : scaledQuantity;
+    return `${formatProteinPiece(pieceCount)} adet`;
+  }
+
+  if (unit === "gram") {
+    const roundedGrams = Math.max(25, Math.round(scaledQuantity / 25) * 25);
+    return `${roundedGrams} gram`;
+  }
+
+  if (unit === "kilogram") {
+    const roundedGrams = Math.max(25, Math.round((scaledQuantity * 1000) / 25) * 25);
+    return `${roundedGrams} gram`;
+  }
 
   // Sıvı miktarlarını tarif ekranında daha pratik mutfak ölçüleriyle göster.
   if (unit === "mililitre" || unit === "ml") {
@@ -46,7 +72,7 @@ function formatAmount(
   }
 
   if (
-    ["adet", "diş", "su bardağı", "çay bardağı", "yemek kaşığı", "tatlı kaşığı", "çay kaşığı"].includes(unit)
+    ["adet", "diş", "su bardağı", "çay bardağı", "yemek kaşığı", "tatlı kaşığı", "çay kaşığı", "paket", "kutu", "dilim", "demet", "kase"].includes(unit)
   ) {
     return `${formatKitchenFraction(scaledQuantity)} ${unit}`;
   }
@@ -68,6 +94,7 @@ export function mapDatabaseRecipeToRecipe(
     (ingredient) => ({
       name: ingredient.name,
       amount: formatAmount(
+        ingredient.name,
         ingredient.quantity,
         ingredient.unit,
         ingredient.quantityText,
