@@ -7,7 +7,7 @@
 
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useSyncExternalStore } from "react";
@@ -29,7 +29,6 @@ import {
   subscribePlan,
   type PlanDay,
 } from "@/lib/week-plan";
-import type { FilterAvailability } from "@/lib/filter-availability";
 import {
   getMadeSnapshot,
   getMadeServerSnapshot,
@@ -76,7 +75,6 @@ const CUISINE_OPTIONS = [
 
 const MEAL_TYPE_OPTIONS = ["", "Kahvaltı", "Öğle", "Akşam", "Atıştırmalık", "Tatlı"];
 const COOKING_METHOD_OPTIONS = ["", "Tencere", "Tava", "Fırın", "Pişirme yok"];
-const BUDGET_OPTIONS = ["", "Düşük", "Orta", "Yüksek"];
 
 // Form seçim kutularının ortak görünümü
 const SELECT_CLASS =
@@ -84,6 +82,87 @@ const SELECT_CLASS =
 
 // Form alanı etiketlerinin ortak görünümü
 const LABEL_CLASS = "mb-1.5 block text-xs font-bold text-stone-500 dark:text-stone-400";
+
+type FilterOption = { value: string; label: string };
+
+// Tarayıcının yerel select menüsü bazı masaüstü ortamlarda yalnızca fare basılıyken
+// açık kalabiliyor. Bu denetim, menüyü tıklamayla açıp seçenek tıklanınca kapatır.
+function FilterSelect({
+  id,
+  label,
+  value,
+  options,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  options: FilterOption[];
+  onChange: (value: string) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const selectedOption = options.find((option) => option.value === value) ?? options[0];
+
+  useEffect(() => {
+    function closeOnOutsidePointer(event: PointerEvent) {
+      if (!containerRef.current?.contains(event.target as Node)) setIsOpen(false);
+    }
+
+    document.addEventListener("pointerdown", closeOnOutsidePointer);
+    return () => document.removeEventListener("pointerdown", closeOnOutsidePointer);
+  }, []);
+
+  return (
+    <div ref={containerRef} className="relative">
+      <label id={`${id}-label`} className={LABEL_CLASS}>
+        {label}
+      </label>
+      <button
+        id={id}
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+        aria-labelledby={`${id}-label ${id}`}
+        onClick={() => setIsOpen((open) => !open)}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") setIsOpen(false);
+        }}
+        className={`${SELECT_CLASS} flex items-center justify-between text-left`}
+      >
+        <span>{selectedOption.label}</span>
+        <span aria-hidden="true" className="ml-3 text-stone-500">⌄</span>
+      </button>
+      {isOpen && (
+        <div
+          role="listbox"
+          aria-labelledby={`${id}-label`}
+          className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-stone-300 bg-white py-1 shadow-lg dark:border-stone-700 dark:bg-stone-900"
+        >
+          {options.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              role="option"
+              aria-selected={option.value === value}
+              onClick={() => {
+                onChange(option.value);
+                setIsOpen(false);
+              }}
+              className={`block w-full px-3 py-2 text-left text-sm transition hover:bg-orange-50 dark:hover:bg-stone-800 ${
+                option.value === value
+                  ? "bg-orange-100 font-semibold text-orange-950 dark:bg-orange-950/50 dark:text-orange-100"
+                  : "text-stone-900 dark:text-stone-100"
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 interface OneriClientProps {
   initialMode: SuggestionMode; // URL'den gelen başlangıç modu
@@ -132,11 +211,8 @@ export default function OneriClient({
   const [diet, setDiet] = useState("");
   const [mealType, setMealType] = useState("");
   const [cookingMethod, setCookingMethod] = useState("");
-  const [budgetLevel, setBudgetLevel] = useState("");
   const [maxTime, setMaxTime] = useState("");
   const [cuisine, setCuisine] = useState("");
-  const [filterAvailability, setFilterAvailability] =
-    useState<FilterAvailability | null>(null);
 
   // Öneri listesi durumu
   const [suggestions, setSuggestions] = useState<DishSuggestion[] | null>(null);
@@ -169,61 +245,6 @@ export default function OneriClient({
     getPlanServerSnapshot
   );
 
-  // Her filtre seçeneğinin, diğer geçerli seçimlerle en az bir tarif üretip
-  // üretmediğini sorgula. Sonuç vermeyen seçenekler seçilemez olur.
-  const canCheckFilterAvailability =
-    mode !== "dolap" || ingredients.length > 0;
-
-  useEffect(() => {
-    if (!canCheckFilterAvailability) return;
-
-    const controller = new AbortController();
-    void fetch("/api/filter-options", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      signal: controller.signal,
-      body: JSON.stringify({
-        mode,
-        ingredients,
-        servings,
-        diet,
-        mealType,
-        cookingMethod,
-        budgetLevel,
-        maxTime: maxTime ? Number(maxTime) : null,
-        cuisine,
-        excludeNames,
-        excludeMadeNames: made,
-        excludeIngredients: [],
-      }),
-    })
-      .then(async (res) => {
-        if (!res.ok) throw new Error("Filtre seçenekleri yüklenemedi.");
-        return res.json() as Promise<{ availability?: FilterAvailability }>;
-      })
-      .then((data) => {
-        if (data.availability) setFilterAvailability(data.availability);
-      })
-      .catch((error: unknown) => {
-        if (error instanceof DOMException && error.name === "AbortError") return;
-        setFilterAvailability(null);
-      });
-
-    return () => controller.abort();
-  }, [canCheckFilterAvailability, mode, ingredients, servings, diet, mealType, cookingMethod, budgetLevel, maxTime, cuisine, excludeNames, made]);
-
-  function isUnavailable(
-    field: keyof FilterAvailability,
-    value: string | number
-  ): boolean {
-    return Boolean(
-      value !== "" &&
-        canCheckFilterAvailability &&
-        filterAvailability &&
-        !filterAvailability[field][String(value)]
-    );
-  }
-
   // 1. Adım: 5 yemeklik listeyi üretir
   const generateList = useCallback(async () => {
     setListLoading(true);
@@ -246,7 +267,6 @@ export default function OneriClient({
           diet,
           mealType,
           cookingMethod,
-          budgetLevel,
           maxTime: maxTime ? Number(maxTime) : null,
           cuisine,
           excludeNames,
@@ -272,7 +292,7 @@ export default function OneriClient({
     } finally {
       setListLoading(false);
     }
-  }, [mode, ingredients, servings, diet, mealType, cookingMethod, budgetLevel, maxTime, cuisine, excludeNames, made]);
+  }, [mode, ingredients, servings, diet, mealType, cookingMethod, maxTime, cuisine, excludeNames, made]);
 
   // 2. Adım: seçilen yemeğin tam tarifini üretir
   const selectDish = useCallback(
@@ -295,7 +315,6 @@ export default function OneriClient({
             diet,
             mealType,
             cookingMethod,
-            budgetLevel,
             maxTime: maxTime ? Number(maxTime) : null,
             cuisine,
             // Seçilen yemeğin kendisini dışlamadan gönder
@@ -321,7 +340,7 @@ export default function OneriClient({
         setRecipeLoading(false);
       }
     },
-    [mode, ingredients, servings, diet, mealType, cookingMethod, budgetLevel, maxTime, cuisine, excludeNames, made]
+    [mode, ingredients, servings, diet, mealType, cookingMethod, maxTime, cuisine, excludeNames, made]
   );
 
   // Form gönderimi: moda göre geçerli mi kontrol et ve listeyi üret
@@ -435,7 +454,6 @@ export default function OneriClient({
           diet: "",
           mealType: "",
           cookingMethod: "",
-          budgetLevel: "",
           maxTime: null,
           cuisine: "",
           excludeNames: [],
@@ -648,151 +666,52 @@ export default function OneriClient({
 
         {/* Filtre seçimleri: kişi sayısı, diyet, süre, mutfak */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div>
-            <label htmlFor="servings" className={LABEL_CLASS}>
-              Kaç Kişilik?
-            </label>
-            <select
-              id="servings"
-              value={servings}
-              onChange={(e) => setServings(Number(e.target.value))}
-              className={SELECT_CLASS}
-            >
-              {[1, 2, 3, 4, 5, 6, 8, 10].map((n) => (
-                <option key={n} value={n}>
-                  {n} kişi
-                </option>
-              ))}
-            </select>
-          </div>
+          <FilterSelect
+            id="servings"
+            label="Kaç Kişilik?"
+            value={String(servings)}
+            onChange={(value) => setServings(Number(value))}
+            options={[1, 2, 3, 4, 5, 6, 8, 10].map((serving) => ({
+              value: String(serving),
+              label: `${serving} kişi`,
+            }))}
+          />
+          <FilterSelect
+            id="diet"
+            label="Diyet"
+            value={diet}
+            onChange={setDiet}
+            options={DIET_OPTIONS.map((option) => ({ value: option, label: option || "Fark etmez" }))}
+          />
+          <FilterSelect
+            id="maxTime"
+            label="Toplam Süre"
+            value={maxTime}
+            onChange={setMaxTime}
+            options={TIME_OPTIONS}
+          />
+          <FilterSelect
+            id="cuisine"
+            label="Mutfak / Yöre"
+            value={cuisine}
+            onChange={setCuisine}
+            options={CUISINE_OPTIONS.map((option) => ({ value: option, label: option || "Fark etmez" }))}
+          />
+          <FilterSelect
+            id="mealType"
+            label="Öğün"
+            value={mealType}
+            onChange={setMealType}
+            options={MEAL_TYPE_OPTIONS.map((option) => ({ value: option, label: option || "Öğün fark etmez" }))}
+          />
+          <FilterSelect
+            id="cookingMethod"
+            label="Pişirme yöntemi"
+            value={cookingMethod}
+            onChange={setCookingMethod}
+            options={COOKING_METHOD_OPTIONS.map((option) => ({ value: option, label: option || "Yöntem fark etmez" }))}
+          />
 
-          <div>
-            <label htmlFor="diet" className={LABEL_CLASS}>
-              Diyet
-            </label>
-            <select
-              id="diet"
-              value={diet}
-              onChange={(e) => setDiet(e.target.value)}
-              className={SELECT_CLASS}
-            >
-              {DIET_OPTIONS.map((d) => (
-                <option key={d} value={d} disabled={isUnavailable("diet", d)}>
-                  {d || "Fark etmez"}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="maxTime" className={LABEL_CLASS}>
-              Toplam Süre
-            </label>
-            <select
-              id="maxTime"
-              value={maxTime}
-              onChange={(e) => setMaxTime(e.target.value)}
-              className={SELECT_CLASS}
-            >
-              {TIME_OPTIONS.map((t) => (
-                <option
-                  key={t.value}
-                  value={t.value}
-                  disabled={isUnavailable("maxTime", t.value)}
-                >
-                  {t.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="cuisine" className={LABEL_CLASS}>
-              Mutfak / Yöre
-            </label>
-            <select
-              id="cuisine"
-              value={cuisine}
-              onChange={(e) => setCuisine(e.target.value)}
-              className={SELECT_CLASS}
-            >
-              {CUISINE_OPTIONS.map((c) => (
-                <option
-                  key={c}
-                  value={c}
-                  disabled={isUnavailable("cuisine", c)}
-                >
-                  {c || "Fark etmez"}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="mealType" className={LABEL_CLASS}>
-              Öğün
-            </label>
-            <select
-              id="mealType"
-              value={mealType}
-              onChange={(e) => setMealType(e.target.value)}
-              className={SELECT_CLASS}
-            >
-              {MEAL_TYPE_OPTIONS.map((option) => (
-                <option
-                  key={option}
-                  value={option}
-                  disabled={isUnavailable("mealType", option)}
-                >
-                  {option || "Öğün fark etmez"}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="cookingMethod" className={LABEL_CLASS}>
-              Pişirme yöntemi
-            </label>
-            <select
-              id="cookingMethod"
-              value={cookingMethod}
-              onChange={(e) => setCookingMethod(e.target.value)}
-              className={SELECT_CLASS}
-            >
-              {COOKING_METHOD_OPTIONS.map((option) => (
-                <option
-                  key={option}
-                  value={option}
-                  disabled={isUnavailable("cookingMethod", option)}
-                >
-                  {option || "Yöntem fark etmez"}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="budgetLevel" className={LABEL_CLASS}>
-              Bütçe
-            </label>
-            <select
-              id="budgetLevel"
-              value={budgetLevel}
-              onChange={(e) => setBudgetLevel(e.target.value)}
-              className={SELECT_CLASS}
-            >
-              {BUDGET_OPTIONS.map((option) => (
-                <option
-                  key={option}
-                  value={option}
-                  disabled={isUnavailable("budgetLevel", option)}
-                >
-                  {option || "Bütçe fark etmez"}
-                </option>
-              ))}
-            </select>
-          </div>
         </div>
 
         {/* Ana buton: listeyi üretir */}

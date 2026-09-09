@@ -362,12 +362,6 @@ const coverageChecks: CoverageCheck[] = [
         recipe.cookingMethod === cookingMethod,
     })
   ),
-  ...["Düşük", "Orta", "Yüksek"].map((budgetLevel) => ({
-    label: `Bütçe: ${budgetLevel}`,
-    request: { budgetLevel },
-    matches: (recipe: ReturnType<typeof recipeFor>) =>
-      recipe.budgetLevel === budgetLevel,
-  })),
 ];
 
 for (const { label, request, matches } of coverageChecks) {
@@ -418,7 +412,6 @@ const menemen = getRecipeById(1);
 assert.ok(menemen);
 const fourServingRecipe = mapDatabaseRecipeToRecipe(menemen, { servings: 4 });
 const tenServingRecipe = mapDatabaseRecipeToRecipe(menemen, { servings: 10 });
-assert.equal(tenServingRecipe.estimatedCostPerServing, 35);
 assert.equal(
   fourServingRecipe.ingredients.find((item) => item.name === "Yumurta")?.amount,
   "8 adet"

@@ -25,8 +25,6 @@ type SeedRecipe = {
   cuisine?: string;
   mealType?: string;
   cookingMethod?: string;
-  budgetLevel?: string;
-  estimatedCostPerServing?: number;
   caloriesPerServing?: number;
   proteinGrams?: number;
   isFreezerFriendly?: boolean;
@@ -75,8 +73,8 @@ const seedRecipes: SeedRecipe[] = [
     category: "Kahvaltı",
     mealType: "Kahvaltı",
     cookingMethod: "Tava",
-    budgetLevel: "Düşük",
-    estimatedCostPerServing: 35,
+
+
     timeMinutes: 20,
     difficulty: "Kolay",
     baseServings: 2,
@@ -745,13 +743,13 @@ const seedRecipes: SeedRecipe[] = [
     ],
   },
   {
-    slug: "cilbir", name: "Çılbır", category: "Kahvaltı", cuisine: "Türk Mutfağı", mealType: "Kahvaltı", cookingMethod: "Tencere", budgetLevel: "Düşük", estimatedCostPerServing: 40, timeMinutes: 15, difficulty: "Kolay", baseServings: 2,
+    slug: "cilbir", name: "Çılbır", category: "Kahvaltı", cuisine: "Türk Mutfağı", mealType: "Kahvaltı", cookingMethod: "Tencere", timeMinutes: 15, difficulty: "Kolay", baseServings: 2,
     diets: ["vegetarian", "gluten_free", "low_carb"],
     ingredients: [ingredient("Yumurta", 4, "adet"), ingredient("Yoğurt", 1, "su bardağı"), ingredient("Sarımsak", 1, "diş"), ingredient("Tereyağı", 2, "yemek kaşığı"), ingredient("Pul biber", 1, "çay kaşığı"), ingredient("Tuz", null, "tutam", { quantityText: "yeteri kadar" })],
     steps: ["Yoğurdu sarımsak ve tuzla karıştır.", "Yumurtaları kaynayan suda poşe et.", "Tereyağında pul biberi kızdır.", "Yumurtaları yoğurt üzerine alıp biberli yağla servis et."],
   },
   {
-    slug: "sebzeli-omlet", name: "Sebzeli Omlet", category: "Kahvaltı", cuisine: "Türk Mutfağı", mealType: "Kahvaltı", cookingMethod: "Tava", budgetLevel: "Düşük", estimatedCostPerServing: 45, timeMinutes: 20, difficulty: "Kolay", baseServings: 2,
+    slug: "sebzeli-omlet", name: "Sebzeli Omlet", category: "Kahvaltı", cuisine: "Türk Mutfağı", mealType: "Kahvaltı", cookingMethod: "Tava", timeMinutes: 20, difficulty: "Kolay", baseServings: 2,
     diets: ["vegetarian", "gluten_free", "low_carb"],
     ingredients: [ingredient("Yumurta", 4, "adet"), ingredient("Mantar", 100, "gram"), ingredient("Kabak", 1, "adet"), ingredient("Bezelye", 100, "gram", { optional: true }), ingredient("Yeşil biber", 1, "adet"), ingredient("Kaşar peyniri", 50, "gram", { optional: true }), ingredient("Sıvı yağ", 1, "yemek kaşığı"), ingredient("Tuz", null, "tutam", { quantityText: "yeteri kadar" })],
     steps: ["Mantar, kabak ve biberi yağda sotele.", "Çırpılmış yumurtayı sebzelerin üzerine dök.", "Kaşar peynirini serpiştirip omleti pişir.", "İkiye katlayıp sıcak servis et."],
@@ -763,7 +761,7 @@ const seedRecipes: SeedRecipe[] = [
     steps: ["Domates ve biberi tereyağında pişir.", "Beyaz peyniri ekleyip karıştır.", "Yumurtaları üzerine kırıp kapağı kapat.", "Yumurta akları pişince servis et."],
   },
   {
-    slug: "domates-corbasi", name: "Domates Çorbası", category: "Çorba", cuisine: "Türk Mutfağı", mealType: "Akşam", cookingMethod: "Tencere", budgetLevel: "Düşük", estimatedCostPerServing: 30, timeMinutes: 30, difficulty: "Kolay", baseServings: 4,
+    slug: "domates-corbasi", name: "Domates Çorbası", category: "Çorba", cuisine: "Türk Mutfağı", mealType: "Akşam", cookingMethod: "Tencere", timeMinutes: 30, difficulty: "Kolay", baseServings: 4,
     diets: ["vegetarian", "gluten_free", "low_calorie"],
     ingredients: [ingredient("Domates", 5, "adet"), ingredient("Domates salçası", 1, "yemek kaşığı"), ingredient("Soğan", 1, "adet"), ingredient("Sarımsak", 1, "diş", { optional: true }), ingredient("Zeytinyağı", 2, "yemek kaşığı"), ingredient("Su", 4, "su bardağı"), ingredient("Tuz", null, "tutam", { quantityText: "yeteri kadar" }), ingredient("Karabiber", null, "tutam", { quantityText: "isteğe göre" })],
     steps: ["Soğanı yağda kavurup salçayı ekle.", "Domates, sarımsak ve suyu ilave edip kaynat.", "Çorbayı blenderdan geçir.", "Tuz ve karabiberle servis et."],
@@ -787,7 +785,7 @@ const seedRecipes: SeedRecipe[] = [
     steps: ["Soğanı yağda yumuşat.", "Sebzeleri ekleyip birkaç dakika çevir.", "Suyu ekleyip sebzeler yumuşayana kadar pişir.", "Tuzlayıp taneli veya pürüzsüz servis et."],
   },
   {
-    slug: "tavuk-sote", name: "Tavuk Sote", category: "Ana yemek", cuisine: "Türk Mutfağı", mealType: "Akşam", cookingMethod: "Tava", budgetLevel: "Orta", estimatedCostPerServing: 75, timeMinutes: 35, difficulty: "Kolay", baseServings: 4,
+    slug: "tavuk-sote", name: "Tavuk Sote", category: "Ana yemek", cuisine: "Türk Mutfağı", mealType: "Akşam", cookingMethod: "Tava", timeMinutes: 35, difficulty: "Kolay", baseServings: 4,
     diets: ["gluten_free", "low_carb"],
     ingredients: [ingredient("Tavuk göğsü", 500, "gram"), ingredient("Soğan", 1, "adet"), ingredient("Domates", 2, "adet"), ingredient("Yeşil biber", 2, "adet"), ingredient("Sarımsak", 2, "diş"), ingredient("Zeytinyağı", 3, "yemek kaşığı"), ingredient("Kekik", 1, "çay kaşığı", { optional: true }), ingredient("Tuz", null, "tutam", { quantityText: "yeteri kadar" })],
     steps: ["Tavuğu yağda renk alana kadar sotele.", "Soğan ve biberi ekleyip yumuşat.", "Domates ve sarımsağı ilave edip pişir.", "Kekik ve tuzla servis et."],
@@ -805,7 +803,7 @@ const seedRecipes: SeedRecipe[] = [
     steps: ["Soğanı yağda kavur.", "Fasulyeyi ekleyip birkaç dakika çevir.", "Domates, sarımsak ve suyu ilave et.", "Fasulyeler yumuşayana kadar pişir."],
   },
   {
-    slug: "firinda-somon", name: "Fırında Somon", category: "Ana yemek", cuisine: "Akdeniz mutfağı", mealType: "Akşam", cookingMethod: "Fırın", budgetLevel: "Yüksek", estimatedCostPerServing: 220, timeMinutes: 30, difficulty: "Kolay", baseServings: 2,
+    slug: "firinda-somon", name: "Fırında Somon", category: "Ana yemek", cuisine: "Akdeniz mutfağı", mealType: "Akşam", cookingMethod: "Fırın", timeMinutes: 30, difficulty: "Kolay", baseServings: 2,
     diets: ["gluten_free", "low_carb", "low_calorie"],
     ingredients: [ingredient("Somon fileto", 400, "gram"), ingredient("Limon suyu", 2, "yemek kaşığı"), ingredient("Zeytinyağı", 2, "yemek kaşığı"), ingredient("Sarımsak", 1, "diş", { optional: true }), ingredient("Biberiye", 1, "dal", { optional: true }), ingredient("Tuz", null, "tutam", { quantityText: "yeteri kadar" }), ingredient("Karabiber", null, "tutam", { quantityText: "isteğe göre" })],
     steps: ["Somonları tepsiye yerleştir.", "Limon, yağ, sarımsak ve baharatları üzerine sür.", "200 derece fırında 20 dakika pişir.", "Sıcak servis et."],
@@ -817,7 +815,7 @@ const seedRecipes: SeedRecipe[] = [
     steps: ["Soğan ve biberi yağda yumuşat.", "Patlıcan ve kabağı ekleyip sotele.", "Domatesi ilave edip sebzeler yumuşayana kadar pişir.", "Fesleğen ve tuzla servis et."],
   },
   {
-    slug: "pasta-arrabbiata", name: "Pasta Arrabbiata", category: "Ana yemek", cuisine: "İtalyan mutfağı", mealType: "Akşam", cookingMethod: "Tencere", budgetLevel: "Düşük", estimatedCostPerServing: 35, timeMinutes: 30, difficulty: "Kolay", baseServings: 4,
+    slug: "pasta-arrabbiata", name: "Pasta Arrabbiata", category: "Ana yemek", cuisine: "İtalyan mutfağı", mealType: "Akşam", cookingMethod: "Tencere", timeMinutes: 30, difficulty: "Kolay", baseServings: 4,
     diets: ["vegan", "vegetarian"],
     ingredients: [ingredient("Makarna", 350, "gram"), ingredient("Domates", 4, "adet"), ingredient("Sarımsak", 3, "diş"), ingredient("Zeytinyağı", 3, "yemek kaşığı"), ingredient("Pul biber", 1, "çay kaşığı"), ingredient("Fesleğen", 0.5, "demet", { optional: true }), ingredient("Tuz", null, "tutam", { quantityText: "yeteri kadar" })],
     steps: ["Makarnayı tuzlu suda haşla.", "Sarımsağı yağda çevirip domates ve pul biberi ekle.", "Sosu koyulaşana kadar pişir.", "Makarnayı sosla karıştırıp fesleğenle servis et."],
@@ -859,13 +857,13 @@ const seedRecipes: SeedRecipe[] = [
     steps: ["Biber ve domatesi yağda sotele.", "Tortillaya peynir, mısır ve sebzeleri yerleştir.", "Tortillayı kapatıp iki tarafını tavada kızart.", "Dilimleyip servis et."],
   },
   {
-    slug: "humus", name: "Humus", category: "Salata/meze", cuisine: "Akdeniz mutfağı", mealType: "Atıştırmalık", cookingMethod: "Pişirme yok", budgetLevel: "Düşük", estimatedCostPerServing: 40, timeMinutes: 20, difficulty: "Kolay", baseServings: 4,
+    slug: "humus", name: "Humus", category: "Salata/meze", cuisine: "Akdeniz mutfağı", mealType: "Atıştırmalık", cookingMethod: "Pişirme yok", timeMinutes: 20, difficulty: "Kolay", baseServings: 4,
     diets: ["vegan", "vegetarian", "gluten_free", "low_calorie"],
     ingredients: [ingredient("Nohut", 2, "su bardağı"), ingredient("Tahin", 3, "yemek kaşığı"), ingredient("Limon suyu", 3, "yemek kaşığı"), ingredient("Sarımsak", 1, "diş"), ingredient("Zeytinyağı", 3, "yemek kaşığı"), ingredient("Su", 0.5, "su bardağı"), ingredient("Kimyon", 0.5, "çay kaşığı", { optional: true }), ingredient("Tuz", null, "tutam", { quantityText: "yeteri kadar" })],
     steps: ["Nohut, tahin, limon, sarımsak ve kimyonu blendera al.", "Su ekleyerek pürüzsüz çek.", "Tuzla tatlandırıp tabağa al.", "Zeytinyağı gezdirerek servis et."],
   },
   {
-    slug: "caprese-salatasi", name: "Caprese Salatası", category: "Salata/meze", cuisine: "İtalyan mutfağı", mealType: "Öğle", cookingMethod: "Pişirme yok", budgetLevel: "Orta", estimatedCostPerServing: 95, timeMinutes: 15, difficulty: "Kolay", baseServings: 2,
+    slug: "caprese-salatasi", name: "Caprese Salatası", category: "Salata/meze", cuisine: "İtalyan mutfağı", mealType: "Öğle", cookingMethod: "Pişirme yok", timeMinutes: 15, difficulty: "Kolay", baseServings: 2,
     diets: ["vegetarian", "gluten_free", "low_carb"],
     ingredients: [ingredient("Domates", 3, "adet"), ingredient("Mozzarella", 200, "gram"), ingredient("Fesleğen", 0.5, "demet", { optional: true }), ingredient("Zeytinyağı", 2, "yemek kaşığı"), ingredient("Limon suyu", 1, "yemek kaşığı", { optional: true }), ingredient("Tuz", null, "tutam", { quantityText: "yeteri kadar" })],
     steps: ["Domates ve mozzarellayı dilimleyip sırayla diz.", "Fesleğen yapraklarını aralara yerleştir.", "Yağ, limon ve tuz gezdir.", "Bekletmeden servis et."],
@@ -1069,33 +1067,6 @@ function catalogCookingMethod(name: string, category: string): string {
   return "Tencere";
 }
 
-function catalogBudgetLevel(name: string, category: string): string {
-  const normalizedName = normalizeIngredientName(name);
-  const premiumIngredients = [
-    "somon",
-    "karides",
-    "kuzu",
-    "dana",
-    "biftek",
-    "ton baligi",
-    "parmesan",
-    "avokado",
-  ];
-
-  if (premiumIngredients.some((item) => normalizedName.includes(item))) {
-    return "Yüksek";
-  }
-  if (
-    category === "Kahvaltı" ||
-    category === "Çorba" ||
-    category === "Salata/meze" ||
-    category === "Hamur işi"
-  ) {
-    return "Düşük";
-  }
-  return "Orta";
-}
-
 function buildCatalogGroups(groups: CatalogGroup[]): SeedRecipe[] {
   return groups.flatMap((group) =>
     group.names.map((name, index) => {
@@ -1107,7 +1078,6 @@ function buildCatalogGroups(groups: CatalogGroup[]): SeedRecipe[] {
         cuisine: group.cuisine,
         mealType: catalogMealType(group.category),
         cookingMethod: catalogCookingMethod(name, group.category),
-        budgetLevel: catalogBudgetLevel(name, group.category),
         timeMinutes: group.times[index % group.times.length],
         difficulty: group.times[index % group.times.length] <= 20 ? "Kolay" : group.times[index % group.times.length] <= 45 ? "Orta" : "Zor",
         // catalogMeasures içindeki miktarlar dört kişilik ev tarifi içindir.
@@ -1311,8 +1281,8 @@ const curatedCatalogV2: SeedRecipe[] = [
     cuisine: "Türk Mutfağı",
     mealType: "Kahvaltı",
     cookingMethod: "Tava",
-    budgetLevel: "Düşük",
-    estimatedCostPerServing: 45,
+
+
     timeMinutes: 35,
     difficulty: "Kolay",
     baseServings: 4,
@@ -1340,7 +1310,7 @@ const curatedCatalogV2: SeedRecipe[] = [
     cuisine: "Türk Mutfağı",
     mealType: "Öğle",
     cookingMethod: "Fırın",
-    budgetLevel: "Düşük",
+
     timeMinutes: 40,
     difficulty: "Kolay",
     baseServings: 4,
@@ -1367,8 +1337,8 @@ const curatedCatalogV2: SeedRecipe[] = [
     cuisine: "Türk Mutfağı",
     mealType: "Akşam",
     cookingMethod: "Fırın",
-    budgetLevel: "Orta",
-    estimatedCostPerServing: 85,
+
+
     timeMinutes: 55,
     difficulty: "Kolay",
     baseServings: 4,
@@ -1399,7 +1369,7 @@ const curatedCatalogV2: SeedRecipe[] = [
     cuisine: "Akdeniz mutfağı",
     mealType: "Öğle",
     cookingMethod: "Tencere",
-    budgetLevel: "Orta",
+
     timeMinutes: 30,
     difficulty: "Kolay",
     baseServings: 3,
@@ -1427,7 +1397,7 @@ const curatedCatalogV2: SeedRecipe[] = [
     cuisine: "Akdeniz mutfağı",
     mealType: "Öğle",
     cookingMethod: "Tencere",
-    budgetLevel: "Düşük",
+
     timeMinutes: 35,
     difficulty: "Kolay",
     baseServings: 3,
@@ -1455,8 +1425,8 @@ const curatedCatalogV2: SeedRecipe[] = [
     cuisine: "Asya mutfağı",
     mealType: "Akşam",
     cookingMethod: "Tava",
-    budgetLevel: "Orta",
-    estimatedCostPerServing: 110,
+
+
     timeMinutes: 25,
     difficulty: "Kolay",
     baseServings: 3,
@@ -1484,7 +1454,7 @@ const curatedCatalogV2: SeedRecipe[] = [
     cuisine: "Asya mutfağı",
     mealType: "Akşam",
     cookingMethod: "Tava",
-    budgetLevel: "Orta",
+
     timeMinutes: 30,
     difficulty: "Kolay",
     baseServings: 3,
@@ -1512,7 +1482,7 @@ const curatedCatalogV2: SeedRecipe[] = [
     cuisine: "Meksika mutfağı",
     mealType: "Akşam",
     cookingMethod: "Tencere",
-    budgetLevel: "Düşük",
+
     timeMinutes: 35,
     difficulty: "Kolay",
     baseServings: 3,
@@ -1540,7 +1510,7 @@ const curatedCatalogV2: SeedRecipe[] = [
     cuisine: "Akdeniz mutfağı",
     mealType: "Akşam",
     cookingMethod: "Fırın",
-    budgetLevel: "Düşük",
+
     timeMinutes: 35,
     difficulty: "Kolay",
     baseServings: 3,
@@ -1567,7 +1537,7 @@ const curatedCatalogV2: SeedRecipe[] = [
     cuisine: "İtalyan mutfağı",
     mealType: "Öğle",
     cookingMethod: "Tencere",
-    budgetLevel: "Orta",
+
     timeMinutes: 25,
     difficulty: "Kolay",
     baseServings: 3,
@@ -1595,7 +1565,7 @@ const curatedCatalogV2: SeedRecipe[] = [
     cuisine: "Akdeniz mutfağı",
     mealType: "Tatlı",
     cookingMethod: "Fırın",
-    budgetLevel: "Düşük",
+
     timeMinutes: 35,
     difficulty: "Kolay",
     baseServings: 4,
@@ -1625,7 +1595,7 @@ const curatedCatalogV2SecondBatch: SeedRecipe[] = [
     cuisine: "Türk Mutfağı",
     mealType: "Öğle",
     cookingMethod: "Tencere",
-    budgetLevel: "Düşük",
+
     timeMinutes: 45,
     difficulty: "Orta",
     baseServings: 6,
@@ -1653,7 +1623,7 @@ const curatedCatalogV2SecondBatch: SeedRecipe[] = [
     cuisine: "Türk Mutfağı",
     mealType: "Akşam",
     cookingMethod: "Fırın",
-    budgetLevel: "Orta",
+
     timeMinutes: 50,
     difficulty: "Orta",
     baseServings: 4,
@@ -1682,7 +1652,7 @@ const curatedCatalogV2SecondBatch: SeedRecipe[] = [
     cuisine: "Türk Mutfağı",
     mealType: "Akşam",
     cookingMethod: "Tava",
-    budgetLevel: "Düşük",
+
     timeMinutes: 25,
     difficulty: "Kolay",
     baseServings: 3,
@@ -1710,8 +1680,8 @@ const curatedCatalogV2SecondBatch: SeedRecipe[] = [
     cuisine: "Akdeniz mutfağı",
     mealType: "Kahvaltı",
     cookingMethod: "Tava",
-    budgetLevel: "Orta",
-    estimatedCostPerServing: 70,
+
+
     timeMinutes: 15,
     difficulty: "Kolay",
     baseServings: 2,
@@ -1738,8 +1708,8 @@ const curatedCatalogV2SecondBatch: SeedRecipe[] = [
     cuisine: "Akdeniz mutfağı",
     mealType: "Öğle",
     cookingMethod: "Fırın",
-    budgetLevel: "Yüksek",
-    estimatedCostPerServing: 240,
+
+
     timeMinutes: 35,
     difficulty: "Orta",
     baseServings: 2,
@@ -1767,7 +1737,7 @@ const curatedCatalogV2SecondBatch: SeedRecipe[] = [
     cuisine: "Akdeniz mutfağı",
     mealType: "Öğle",
     cookingMethod: "Tencere",
-    budgetLevel: "Düşük",
+
     timeMinutes: 25,
     difficulty: "Kolay",
     baseServings: 3,
@@ -1798,8 +1768,8 @@ const detailedRecipes: SeedRecipe[] = [
     cuisine: "Türk Mutfağı",
     mealType: "Akşam",
     cookingMethod: "Fırın",
-    budgetLevel: "Orta",
-    estimatedCostPerServing: 95,
+
+
     timeMinutes: 90,
     difficulty: "Orta",
     baseServings: 6,
@@ -1892,9 +1862,6 @@ function upsertRecipe(recipe: SeedRecipe): number {
         mealType: recipe.mealType ?? catalogMealType(recipe.category),
         cookingMethod:
           recipe.cookingMethod ?? catalogCookingMethod(recipe.name, recipe.category),
-        budgetLevel:
-          recipe.budgetLevel ?? catalogBudgetLevel(recipe.name, recipe.category),
-        estimatedCostPerServing: recipe.estimatedCostPerServing ?? null,
         caloriesPerServing: recipe.caloriesPerServing ?? null,
         proteinGrams: recipe.proteinGrams ?? null,
         isFreezerFriendly: recipe.isFreezerFriendly ?? false,
@@ -1919,9 +1886,6 @@ function upsertRecipe(recipe: SeedRecipe): number {
       mealType: recipe.mealType ?? catalogMealType(recipe.category),
       cookingMethod:
         recipe.cookingMethod ?? catalogCookingMethod(recipe.name, recipe.category),
-      budgetLevel:
-        recipe.budgetLevel ?? catalogBudgetLevel(recipe.name, recipe.category),
-      estimatedCostPerServing: recipe.estimatedCostPerServing ?? null,
       caloriesPerServing: recipe.caloriesPerServing ?? null,
       proteinGrams: recipe.proteinGrams ?? null,
       isFreezerFriendly: recipe.isFreezerFriendly ?? false,

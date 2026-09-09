@@ -38,7 +38,6 @@ export async function POST(request: Request) {
       diet: toDietCode(req.diet),
       mealType: req.mealType,
       cookingMethod: req.cookingMethod,
-      budgetLevel: req.budgetLevel,
     }).find(
       (candidate) => normalizeSearchText(candidate.name) === normalizedDishName
     );

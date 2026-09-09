@@ -16,8 +16,7 @@ Uygulamayı Chrome ya da Edge ile açtıktan sonra tarayıcı menüsünden **Uyg
 
 - Dolaptaki malzemelerle tarif bulma veya malzemesiz öneri alma
 - Kişi sayısına göre otomatik miktar ölçekleme
-- Diyet, toplam süre, mutfak/yöre, öğün, pişirme yöntemi ve bütçe filtreleri
-- Seçili tercihlere uygun sonuç vermeyecek filtre seçeneklerini pasif gösterme
+- Diyet, toplam süre, mutfak/yöre, öğün ve pişirme yöntemi filtreleri
 - Eşleşen ve eksik malzemeleri açıklama; eksik malzemeler için alternatif önerileri
 - Eksik malzeme listesini tek tuşla kopyalama ve alışveriş listesine ekleme
 - Tekrarlanan malzemeleri miktarlarıyla birleştiren alışveriş listesi

@@ -13,7 +13,6 @@ export interface RecommendationRequest {
   diet?: string;
   mealType?: string;
   cookingMethod?: string;
-  budgetLevel?: string;
   maxTime?: number | null;
   cuisine?: string;
   excludeNames?: string[];
@@ -269,7 +268,6 @@ export function getRecommendations(
     diet: toDietCode(request.diet),
     mealType: request.mealType?.trim() || undefined,
     cookingMethod: request.cookingMethod?.trim() || undefined,
-    budgetLevel: request.budgetLevel?.trim() || undefined,
   };
 
   const recipes = findRecipes(filters);

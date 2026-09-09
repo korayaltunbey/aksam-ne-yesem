@@ -38,8 +38,6 @@ export function parseSuggestionRequest(body: unknown): {
   const mealType = typeof b.mealType === "string" ? b.mealType.trim() : "";
   const cookingMethod =
     typeof b.cookingMethod === "string" ? b.cookingMethod.trim() : "";
-  const budgetLevel =
-    typeof b.budgetLevel === "string" ? b.budgetLevel.trim() : "";
 
   // Maksimum süre pozitif sayıysa kabul edilir, değilse boş
   const maxTime =
@@ -75,7 +73,6 @@ export function parseSuggestionRequest(body: unknown): {
       diet,
       mealType,
       cookingMethod,
-      budgetLevel,
       maxTime,
       cuisine,
       excludeNames,

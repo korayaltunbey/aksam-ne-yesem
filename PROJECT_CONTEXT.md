@@ -60,9 +60,7 @@ Tarif hazırlanış ilerlemesi `lib/steps.ts` üzerinden `foof-recipe-steps` loc
 
 Haftalık yemek planı `lib/week-plan.ts` üzerinden `foof-week-plan` localStorage anahtarında tutulur; tarif detayından gün seçilerek eklenir ve ana sayfada gün bazında kaldırılabilir.
 
-Tarif metadata alanları `recipes` tablosunda tutulur: `mealType`, `cookingMethod`, `budgetLevel`, `caloriesPerServing`, `proteinGrams` ve `isFreezerFriendly`. Alanlar geriye dönük uyumlu olarak nullable/varsayılanlıdır; mevcut tarifler metadata olmadan da çalışır.
-
-`estimatedCostPerServing` alanı küratörlü tariflerde yaklaşık TL/porsiyon maliyetini taşır. Bu değer tarif kartında yaklaşık olarak gösterilir; kalori ve protein alanları doğrulanmış veri yoksa boş bırakılır.
+Tarif metadata alanları `recipes` tablosunda tutulur: `mealType`, `cookingMethod`, `caloriesPerServing`, `proteinGrams` ve `isFreezerFriendly`. Alanlar geriye dönük uyumlu olarak nullable/varsayılanlıdır; mevcut tarifler metadata olmadan da çalışır.
 
 ## Recommendation davranışı
 
@@ -74,7 +72,7 @@ Dolaptakiler modunda en az bir kullanıcı malzemesiyle eşleşen tarifler göst
 4. Hazırlama süresi
 5. Tarif adı
 
-Ingredient matching normalization ve token-aware eşleşme kullanır. Bu sayede `tavuk`, `tavuk göğsü` gibi anlamlı alt türler eşleşebilir. Diyet, mutfak, süre, öğün, pişirme yöntemi, bütçe, `excludeNames` ve `excludeIngredients` filtreleri recommendation/repository katmanında uygulanır.
+Ingredient matching normalization ve token-aware eşleşme kullanır. Bu sayede `tavuk`, `tavuk göğsü` gibi anlamlı alt türler eşleşebilir. Diyet, mutfak, süre, öğün, pişirme yöntemi, `excludeNames` ve `excludeIngredients` filtreleri recommendation/repository katmanında uygulanır.
 
 Genel `Bana Öner` modunda ingredient filtresi uygulanmaz; diğer filtreler çalışmaya devam eder. Dolaptakiler modunda öneri geçmişi uygun tariflerin tamamını dışlarsa, uygun tarifleri yeniden kullanabilen güvenli fallback uygulanır.
 

@@ -20,8 +20,6 @@ export interface Recipe {
   name: string; // yemeğin adı
   mealType?: string;
   cookingMethod?: string;
-  budgetLevel?: string;
-  estimatedCostPerServing?: number;
   caloriesPerServing?: number;
   proteinGrams?: number;
   isFreezerFriendly?: boolean;
@@ -57,7 +55,6 @@ export interface SuggestionRequest {
   diet: string; // diyet tercihi (boş olabilir)
   mealType: string; // öğün türü (boş olabilir)
   cookingMethod: string; // pişirme yöntemi (boş olabilir)
-  budgetLevel: string; // bütçe seviyesi (boş olabilir)
   maxTime: number | null; // maksimum süre (boş olabilir)
   cuisine: string; // mutfak/yöre tercihi (boş olabilir)
   excludeNames: string[]; // önerilmemesi gereken yemek adları

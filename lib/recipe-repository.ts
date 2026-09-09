@@ -30,8 +30,6 @@ export interface DatabaseRecipe {
   cuisine: string | null;
   mealType: string | null;
   cookingMethod: string | null;
-  budgetLevel: string | null;
-  estimatedCostPerServing: number | null;
   caloriesPerServing: number | null;
   proteinGrams: number | null;
   isFreezerFriendly: boolean;
@@ -50,7 +48,6 @@ export interface RecipeSearchFilters {
   diet?: string;
   mealType?: string;
   cookingMethod?: string;
-  budgetLevel?: string;
 }
 
 function loadRecipe(id: number): DatabaseRecipe | null {
@@ -63,8 +60,6 @@ function loadRecipe(id: number): DatabaseRecipe | null {
       cuisine: recipes.cuisine,
       mealType: recipes.mealType,
       cookingMethod: recipes.cookingMethod,
-      budgetLevel: recipes.budgetLevel,
-      estimatedCostPerServing: recipes.estimatedCostPerServing,
       caloriesPerServing: recipes.caloriesPerServing,
       proteinGrams: recipes.proteinGrams,
       isFreezerFriendly: recipes.isFreezerFriendly,
@@ -154,10 +149,6 @@ export function findRecipes(
 
   if (filters.cookingMethod) {
     conditions.push(eq(recipes.cookingMethod, filters.cookingMethod));
-  }
-
-  if (filters.budgetLevel) {
-    conditions.push(eq(recipes.budgetLevel, filters.budgetLevel));
   }
 
   if (filters.diet) {

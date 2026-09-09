@@ -111,16 +111,6 @@ export default function TarifKarti({ recipe }: TarifKartiProps) {
               {recipe.cookingMethod}
             </span>
           )}
-          {recipe.budgetLevel && (
-            <span className="inline-flex items-center rounded-md bg-black/25 px-2.5 py-1">
-              Bütçe: {recipe.budgetLevel}
-            </span>
-          )}
-          {recipe.estimatedCostPerServing !== undefined && (
-            <span className="inline-flex items-center rounded-md bg-black/25 px-2.5 py-1">
-              ~{recipe.estimatedCostPerServing} TL / porsiyon
-            </span>
-          )}
         </div>
       </div>
 

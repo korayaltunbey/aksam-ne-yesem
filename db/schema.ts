@@ -20,8 +20,6 @@ export const recipes = sqliteTable(
     cuisine: text("cuisine"),
     mealType: text("meal_type"),
     cookingMethod: text("cooking_method"),
-    budgetLevel: text("budget_level"),
-    estimatedCostPerServing: real("estimated_cost_per_serving"),
     caloriesPerServing: integer("calories_per_serving"),
     proteinGrams: real("protein_grams"),
     isFreezerFriendly: integer("is_freezer_friendly", { mode: "boolean" })
@@ -47,7 +45,6 @@ export const recipes = sqliteTable(
       table.isActive,
       table.cookingMethod
     ),
-    index("recipes_active_budget_idx").on(table.isActive, table.budgetLevel),
     index("recipes_active_time_idx").on(table.isActive, table.timeMinutes),
     check("recipes_time_positive", sql`${table.timeMinutes} > 0`),
     check("recipes_servings_positive", sql`${table.baseServings} > 0`),

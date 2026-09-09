@@ -107,10 +107,6 @@ export function mapDatabaseRecipeToRecipe(
     name: recipe.name,
     ...(recipe.mealType ? { mealType: recipe.mealType } : {}),
     ...(recipe.cookingMethod ? { cookingMethod: recipe.cookingMethod } : {}),
-    ...(recipe.budgetLevel ? { budgetLevel: recipe.budgetLevel } : {}),
-    ...(recipe.estimatedCostPerServing !== null
-      ? { estimatedCostPerServing: recipe.estimatedCostPerServing }
-      : {}),
     ...(recipe.caloriesPerServing !== null
       ? { caloriesPerServing: recipe.caloriesPerServing }
       : {}),
