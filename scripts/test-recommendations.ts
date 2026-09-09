@@ -112,6 +112,10 @@ assert.equal(
   fiveServingSebzeliMercimekCorbasi.ingredients.find((item) => item.name === "Zeytinyağı")?.amount,
   "2 tam + yarım yemek kaşığı"
 );
+assert.equal(
+  fiveServingSebzeliMercimekCorbasi.ingredients.find((item) => item.name === "Su")?.amount,
+  "7 tam + yarım su bardağı"
+);
 
 const servingOptions = [1, 2, 3, 4, 5, 6, 8, 10];
 for (const servings of servingOptions) {

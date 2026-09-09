@@ -416,11 +416,60 @@ export default function OneriClient({
   useEffect(() => {
     const initialRecipeName = initialFavoriteName ?? initialPlannedName;
     if (!initialRecipeName || recipe) return;
-    const source = initialFavoriteName ? favorites : plannedRecipes;
-    const savedRecipe = source.find(
-      (item) => item.recipe.name.toLocaleLowerCase("tr-TR") === initialRecipeName.toLocaleLowerCase("tr-TR")
+
+    if (initialPlannedName) {
+      const plannedRecipe = plannedRecipes.find(
+        (item) =>
+          item.recipe.name.toLocaleLowerCase("tr-TR") ===
+          initialPlannedName.toLocaleLowerCase("tr-TR")
+      );
+      if (!plannedRecipe) return;
+      let cancelled = false;
+      void fetch("/api/recipe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mode: "bana",
+          ingredients: [],
+          servings: plannedRecipe.recipe.servings,
+          diet: "",
+          mealType: "",
+          cookingMethod: "",
+          budgetLevel: "",
+          maxTime: null,
+          cuisine: "",
+          excludeNames: [],
+          excludeMadeNames: [],
+          excludeIngredients: [],
+          dishName: initialPlannedName,
+        }),
+      })
+        .then(async (response) => {
+          if (!response.ok) throw new Error("Tarif güncellenemedi");
+          return response.json() as Promise<{ recipe: Recipe }>;
+        })
+        .then(({ recipe: refreshedRecipe }) => {
+          if (cancelled) return;
+          setRecipe(refreshedRecipe);
+          setSuggestions(null);
+          setPlannedRecipe(plannedRecipe.day, refreshedRecipe);
+        })
+        .catch(() => {
+          if (!cancelled) setRecipe(plannedRecipe.recipe);
+        });
+
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    const savedRecipe = favorites.find(
+      (item) =>
+        item.recipe.name.toLocaleLowerCase("tr-TR") ===
+        initialRecipeName.toLocaleLowerCase("tr-TR")
     );
     if (!savedRecipe) return;
+
     const timeoutId = window.setTimeout(() => {
       setRecipe(savedRecipe.recipe);
       setSuggestions(null);

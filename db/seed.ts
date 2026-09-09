@@ -915,6 +915,7 @@ const catalogMeasures: Record<string, [number, string]> = {
   "Yeşil biber": [2, "adet"], "Kırmızı biber": [1, "adet"], Havuç: [2, "adet"], Patates: [3, "adet"],
   "Tatlı patates": [2, "adet"], Salatalık: [2, "adet"], Avokado: [1, "adet"], Lahana: [300, "gram"],
   "Taze fasulye": [400, "gram"], Nohut: [1, "su bardağı"], Mercimek: [1, "su bardağı"],
+  Su: [6, "su bardağı"],
   "Kuru fasulye": [1, "su bardağı"], Pirinç: [1, "su bardağı"], Makarna: [300, "gram"],
   Spagetti: [300, "gram"], "Pirinç eriştesi": [250, "gram"], "Tortilla": [4, "adet"],
   Un: [300, "gram"], Yufka: [2, "adet"], Ekmek: [4, "dilim"], Yumurta: [2, "adet"],
@@ -1135,7 +1136,7 @@ const additionalRecipes = buildCatalogGroups([
   {
     cuisine: "Türk Mutfağı", category: "Çorba",
     names: ["Sebzeli Mercimek Çorbası", "Brokoli Çorbası"],
-    ingredientSets: [["Mercimek", "Havuç", "Soğan", "Zeytinyağı"], ["Brokoli", "Patates", "Soğan", "Süt"], ["Mantar", "Soğan", "Süt", "Tereyağı"], ["Tavuk göğsü", "Havuç", "Soğan", "Yumurta"]],
+    ingredientSets: [["Mercimek", "Havuç", "Soğan", "Zeytinyağı", "Su"], ["Brokoli", "Patates", "Soğan", "Süt"], ["Mantar", "Soğan", "Süt", "Tereyağı"], ["Tavuk göğsü", "Havuç", "Soğan", "Yumurta"]],
     times: [35, 40], diets: [["vegan", "vegetarian", "gluten_free", "low_calorie"], ["vegetarian", "gluten_free"], ["gluten_free"], ["vegetarian"]],
   },
   {
