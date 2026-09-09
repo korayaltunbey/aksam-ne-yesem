@@ -17,11 +17,14 @@ export default async function OneriPage({ searchParams }: Props) {
   const initialMode: SuggestionMode = modeParam === "bana" ? "bana" : "dolap";
   const initialFavoriteName =
     typeof params.favorite === "string" ? params.favorite : undefined;
+  const initialPlannedName =
+    typeof params.planned === "string" ? params.planned : undefined;
 
   return (
     <OneriClient
       initialMode={initialMode}
       initialFavoriteName={initialFavoriteName}
+      initialPlannedName={initialPlannedName}
     />
   );
 }

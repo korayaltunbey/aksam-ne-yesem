@@ -22,8 +22,11 @@ import {
   subscribeFavorites,
 } from "@/lib/favorites";
 import {
+  getPlanServerSnapshot,
+  getPlanSnapshot,
   PLAN_DAYS,
   setPlannedRecipe,
+  subscribePlan,
   type PlanDay,
 } from "@/lib/week-plan";
 import type { FilterAvailability } from "@/lib/filter-availability";
@@ -85,6 +88,7 @@ const LABEL_CLASS = "mb-1.5 block text-xs font-bold text-stone-500 dark:text-sto
 interface OneriClientProps {
   initialMode: SuggestionMode; // URL'den gelen başlangıç modu
   initialFavoriteName?: string;
+  initialPlannedName?: string;
 }
 
 // Liste sırasını bozmadan, harf duyarsız tekrarları temizler
@@ -104,6 +108,7 @@ function dedupeIgnoreCase(names: string[]): string[] {
 export default function OneriClient({
   initialMode,
   initialFavoriteName,
+  initialPlannedName,
 }: OneriClientProps) {
   const router = useRouter(); // URL'i güncellemek için
 
@@ -157,6 +162,11 @@ export default function OneriClient({
   const excludeNames = useMemo(
     () => dedupeIgnoreCase([...made, ...suggested]),
     [made, suggested]
+  );
+  const plannedRecipes = useSyncExternalStore(
+    subscribePlan,
+    getPlanSnapshot,
+    getPlanServerSnapshot
   );
 
   // Her filtre seçeneğinin, diğer geçerli seçimlerle en az bir tarif üretip
@@ -404,19 +414,19 @@ export default function OneriClient({
     : false;
 
   useEffect(() => {
-    if (!initialFavoriteName || recipe) return;
-    const favorite = favorites.find(
-      (item) =>
-        item.recipe.name.toLocaleLowerCase("tr-TR") ===
-        initialFavoriteName.toLocaleLowerCase("tr-TR")
+    const initialRecipeName = initialFavoriteName ?? initialPlannedName;
+    if (!initialRecipeName || recipe) return;
+    const source = initialFavoriteName ? favorites : plannedRecipes;
+    const savedRecipe = source.find(
+      (item) => item.recipe.name.toLocaleLowerCase("tr-TR") === initialRecipeName.toLocaleLowerCase("tr-TR")
     );
-    if (!favorite) return;
+    if (!savedRecipe) return;
     const timeoutId = window.setTimeout(() => {
-      setRecipe(favorite.recipe);
+      setRecipe(savedRecipe.recipe);
       setSuggestions(null);
     }, 0);
     return () => window.clearTimeout(timeoutId);
-  }, [favorites, initialFavoriteName, recipe]);
+  }, [favorites, initialFavoriteName, initialPlannedName, plannedRecipes, recipe]);
 
   function handleFavorite() {
     if (!recipe) return;
@@ -460,7 +470,7 @@ export default function OneriClient({
     );
   }
 
-  if (initialFavoriteName) {
+  if (initialFavoriteName || initialPlannedName) {
     return (
       <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-8">
         <Link
@@ -473,7 +483,7 @@ export default function OneriClient({
         {recipeLoading && (
           <div className="flex items-center justify-center gap-3 rounded-lg border border-stone-200 bg-white p-8 text-sm text-stone-500 dark:border-stone-800 dark:bg-stone-900 dark:text-stone-400">
             <span className="h-5 w-5 animate-spin rounded-full border-2 border-orange-500 border-t-transparent" />
-            Favori tarif açılıyor...
+            Tarif açılıyor...
           </div>
         )}
 
@@ -503,7 +513,7 @@ export default function OneriClient({
                 onClick={handleFavorite}
                 className="flex-1 rounded-lg border border-sky-600 px-4 py-2.5 text-xs font-bold text-sky-700 transition hover:bg-sky-50 dark:border-sky-700 dark:text-sky-300 dark:hover:bg-sky-950"
               >
-                Favoriden Çıkar
+                {favoriteActive ? "Favoriden Çıkar" : "Favorilere Ekle"}
               </button>
             </div>
             {renderPlanControls()}

@@ -413,7 +413,12 @@ export default function HomePage() {
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-violet-100 text-lg dark:bg-violet-950">🍲</span>
                 <div className="min-w-0 flex-1">
                   <p className="text-[11px] font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400">{selectedPlanDay}</p>
-                  <h3 className="mt-0.5 text-base font-bold text-stone-900 dark:text-stone-100">{selectedPlannedRecipe.recipe.name}</h3>
+                  <Link
+                    href={`/oneri?mode=bana&planned=${encodeURIComponent(selectedPlannedRecipe.recipe.name)}`}
+                    className="mt-0.5 block text-base font-bold text-stone-900 transition hover:text-violet-700 dark:text-stone-100 dark:hover:text-violet-300"
+                  >
+                    {selectedPlannedRecipe.recipe.name} <span aria-hidden="true">&rarr;</span>
+                  </Link>
                   <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">
                     {selectedPlannedRecipe.recipe.servings} kişilik · {selectedPlannedRecipe.recipe.timeMinutes} dk · {selectedPlannedRecipe.recipe.difficulty}
                   </p>
