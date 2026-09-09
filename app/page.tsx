@@ -372,18 +372,13 @@ export default function HomePage() {
             const date = getPlanDate(index);
             const isSelected = selectedPlanDay === day;
             const isToday = weekOffset === 0 && index === todayIndex;
-            return (
-              <button
-                type="button"
-                key={day}
-                onClick={() => setSelectedPlanDay(day)}
-                aria-pressed={isSelected}
-                className={`min-h-25 rounded-xl border p-2 text-left transition sm:min-h-30 sm:p-2.5 ${
-                  isSelected
-                    ? "border-violet-600 bg-violet-600 text-white shadow-md shadow-violet-600/20"
-                    : "border-stone-200 bg-white hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-sm dark:border-stone-800 dark:bg-stone-900 dark:hover:border-violet-700"
-                }`}
-              >
+            const calendarDayClass = `min-h-25 rounded-xl border p-2 text-left transition sm:min-h-30 sm:p-2.5 ${
+              isSelected
+                ? "border-violet-600 bg-violet-600 text-white shadow-md shadow-violet-600/20"
+                : "border-stone-200 bg-white hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-sm dark:border-stone-800 dark:bg-stone-900 dark:hover:border-violet-700"
+            }`;
+            const calendarDayContent = (
+              <>
                 <span className={`block text-[9px] font-bold uppercase tracking-wide sm:text-[10px] ${isSelected ? "text-violet-100" : "text-stone-500 dark:text-stone-400"}`}>
                   {day.slice(0, 3)}
                 </span>
@@ -401,6 +396,31 @@ export default function HomePage() {
                     Boş
                   </span>
                 )}
+              </>
+            );
+
+            if (planned) {
+              return (
+                <Link
+                  key={day}
+                  href={`/oneri?mode=bana&planned=${encodeURIComponent(planned.recipe.name)}`}
+                  aria-label={`${day}: ${planned.recipe.name} tarifini aç`}
+                  className={calendarDayClass}
+                >
+                  {calendarDayContent}
+                </Link>
+              );
+            }
+
+            return (
+              <button
+                type="button"
+                key={day}
+                onClick={() => setSelectedPlanDay(day)}
+                aria-pressed={isSelected}
+                className={calendarDayClass}
+              >
+                {calendarDayContent}
               </button>
             );
           })}
