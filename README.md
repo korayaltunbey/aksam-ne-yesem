@@ -1,141 +1,109 @@
-# Akşam Ne Yesem?
+# Akşam Ne Yesem? 🍲
 
-Elindeki malzemelere, damak tercihine ve ayırabileceğin zamana göre yemek önerileri sunan yerel bir Next.js uygulaması.
+Elindeki malzemelere, damak tercihine ve ayırabileceğin süreye göre yemek önerileri sunan Türkçe web uygulaması.
 
-## Öne çıkan özellikler
+## Hemen kullan
 
-- Dolaptaki malzemelerle veya genel olarak yemek önerme
-- Diyet, mutfak/yöre, süre, öğün, pişirme yöntemi ve bütçe filtreleri
-- Malzeme eşleşmesi ve eksik temel malzeme sayısına göre sıralama
-- Kişi sayısına göre otomatik porsiyon ölçekleme
-- Tarif detayları, adım ilerlemesi ve kopyalama
-- Favoriler, alışveriş listesi ve haftalık yemek planı
-- Daha önce önerilen veya yapılan yemekleri tekrar önermeme
+Uygulama yayında: **[aksam-ne-yesem-production.up.railway.app](https://aksam-ne-yesem-production.up.railway.app)**
+
+Kullanmak için hesap oluşturman veya program kurman gerekmez. Bağlantıyı aç, tercihlerini seç ve tarifini al.
+
+### Masaüstüne veya telefona ekleme
+
+Uygulamayı Chrome ya da Edge ile açtıktan sonra tarayıcı menüsünden **Uygulama olarak yükle** seçeneğini kullanabilirsin. Böylece uygulama simgesi ana ekranında veya masaüstünde görünür ve ayrı bir pencere olarak açılır.
+
+## Özellikler
+
+- Dolaptaki malzemelerle tarif bulma veya malzemesiz öneri alma
+- Kişi sayısına göre otomatik miktar ölçekleme
+- Diyet, toplam süre, mutfak/yöre, öğün, pişirme yöntemi ve bütçe filtreleri
+- Seçili tercihlere uygun sonuç vermeyecek filtre seçeneklerini pasif gösterme
+- Eksik malzemeleri gösterme ve alışveriş listesine ekleme
+- Favoriler, haftalık yemek planı, adım takibi ve tarif kopyalama
+- Aynı tarifleri tekrar önermeme ve “yaptım” listesi
 - Açık/koyu tema
-- Harici bir yemek üretim servisi gerektirmeyen yerel SQLite katalogu
+- 255 tariflik yerel SQLite kataloğu
 
-## Herkes için kolay erişim
+## Kullanıcı verileri
 
-Uygulamayı kullanıcıların bilgisayarına kurdurmak yerine bir bağlantıdan yayınlayın. Repository'yi GitHub'a gönderip Docker destekleyen Render, Railway veya Fly.io gibi bir hizmete bağlamak yeterlidir; hizmet bu repodaki `Dockerfile` ile uygulamayı ve tarif veritabanını hazırlar. Kullanıcılar yalnızca size ait ücretsiz hizmet adresini açar.
+Hesap sistemi bulunmaz. Favoriler, alışveriş listesi, haftalık plan, tema ve geçmiş yalnızca kullandığın tarayıcının `localStorage` alanında saklanır. Başka bir cihazda otomatik görünmezler.
 
-Uygulama PWA manifesti içerir. HTTPS ile yayınlanan bağlantıyı Chrome veya Edge'de açan kullanıcılar, tarayıcı menüsündeki **Uygulama olarak yükle** seçeneğiyle uygulamayı masaüstüne ekleyebilir. Node.js, npm, SQLite ya da C++ araçları kurmaları gerekmez.
+## Yerelde Docker ile çalıştırma
 
-Yerelde Docker ile yayın sürümünü denemek için:
+Docker Desktop kuruluysa aşağıdaki iki komut yeterlidir:
 
 ```bash
 docker build -t aksam-ne-yesem .
 docker run --rm -p 3000:3000 aksam-ne-yesem
 ```
 
-Ardından [http://localhost:3000](http://localhost:3000) adresini açın.
+Ardından [http://localhost:3000](http://localhost:3000) adresini aç.
 
-## Teknoloji
+Bu yol Node.js, npm, SQLite veya C++ derleme araçlarını bilgisayarına kurdurmaz; tüm bağımlılıklar Docker konteynerinde hazırlanır.
 
-- Next.js 16 App Router
-- React 19
-- TypeScript
-- Tailwind CSS 4
-- SQLite, Drizzle ORM ve better-sqlite3
+## Geliştirme kurulumu
 
-## Gereksinimler
-
-- Node.js 22.x
-- npm
-
-`better-sqlite3` native bir Node modülüdür. Proje Node.js 22.x ile doğrulanır; Node.js 24 Windows kurulumunda hazır binary bulunamazsa Visual Studio'nun **Desktop development with C++** workload'u gerekebilir. En kolay yol `.nvmrc` dosyasındaki Node 22 sürümünü kullanmaktır.
-
-## Kurulum
-
-Projeyi klonlayın:
+Node.js **22.x** ve npm gerekir.
 
 ```bash
-git clone <REPOSITORY_URL>
+git clone https://github.com/korayaltunbey/aksam-ne-yesem.git
 cd aksam-ne-yesem
-```
-
-Bağımlılıkları lock dosyasına bağlı olarak kurun:
-
-```bash
 npm ci
-```
-
-Yerel SQLite veritabanını oluşturup katalogu yükleyin:
-
-```bash
 npm run db:migrate
 npm run db:seed
-```
-
-Geliştirme sunucusunu başlatın:
-
-```bash
 npm run dev
 ```
 
-Tarayıcıdan [http://localhost:3000](http://localhost:3000) adresini açın.
+Uygulama [http://localhost:3000](http://localhost:3000) adresinde açılır.
 
-## Ağdan erişim
-
-Aynı ağdaki başka bir cihazdan test etmek için:
-
-```bash
-npm run dev -- --hostname 0.0.0.0
-```
-
-Ardından bilgisayarın yerel IP adresini kullanın:
-
-```text
-http://BILGISAYAR_IP_ADRESI:3000
-```
-
-IP adresi değişirse `next.config.ts` içindeki `allowedDevOrigins` değerini güncelleyin. Windows Güvenlik Duvarı, Node.js için özel ağ erişimini engelliyorsa izin verilmesi gerekir.
+> `better-sqlite3` native bir Node modülüdür. Windows'ta Node 22 kullanılması önerilir. Hazır ikili bulunamadığında Visual Studio'nun **Desktop development with C++** iş yükü gerekebilir. Docker kurulumu bu gereksinimi ortadan kaldırır.
 
 ## Komutlar
 
 | Komut | Açıklama |
 | --- | --- |
-| `npm run dev` | Geliştirme sunucusu |
-| `npm run build` | Production derlemesi |
-| `npm run start` | Production sunucusu |
-| `npm run lint` | ESLint kontrolü |
-| `npx tsc --noEmit` | TypeScript kontrolü |
-| `npm run test:recommendations` | Recommendation regression testleri |
-| `npm run db:generate` | Yeni Drizzle migrationı üretir |
+| `npm run dev` | Geliştirme sunucusunu başlatır |
+| `npm run build` | Production derlemesi üretir |
+| `npm run start` | Production sunucusunu başlatır |
+| `npm run lint` | ESLint kontrolünü çalıştırır |
+| `npx tsc --noEmit` | TypeScript kontrolünü çalıştırır |
+| `npm run test:recommendations` | Öneri ve filtre regresyon testlerini çalıştırır |
 | `npm run db:migrate` | SQLite migrationlarını uygular |
-| `npm run db:seed` | Tarif katalogunu idempotent şekilde yükler |
+| `npm run db:seed` | Tarif kataloğunu oluşturur veya günceller |
 
-## Veritabanı
+## Teknoloji
 
-Çalışma zamanı veritabanı `data/aksam-ne-yesem.db` dosyasında tutulur. Bu dosya yereldir ve `.gitignore` ile repository dışında bırakılır. Yeni bir kurulumda migration ve seed komutlarını çalıştırmak yeterlidir.
+- Next.js 16, React 19 ve TypeScript
+- Tailwind CSS 4
+- SQLite, Drizzle ORM ve better-sqlite3
+- Docker ile yayın paketi
+- PWA manifesti ile tarayıcıdan uygulama olarak kurulum
 
-Seed katalogunda tarifler için slug, malzeme, miktar, adım, diyet, öğün, pişirme yöntemi, bütçe ve uygun olduğunda tahmini porsiyon maliyeti metadata'sı bulunur. Kalori ve protein alanları doğrulanmış veri yoksa boş bırakılır.
+## Mimari
 
-## Yerel kullanıcı verileri
+```text
+Tarayıcı
+  → Next.js API route'ları
+  → öneri ve filtreleme motoru
+  → SQLite tarif kataloğu
+```
 
-Kimlik doğrulama olmadığı için favoriler, alışveriş listesi, haftalık plan, adım ilerlemesi, tema ve geçmiş tarayıcı `localStorage` alanında tutulur. Bu veriler başka bilgisayara otomatik taşınmaz.
+Tarif kataloğu çalışma anında harici bir yapay zekâ veya yemek üretim servisine ihtiyaç duymaz.
 
-## Proje yapısı
+## Yayınlama
 
-| Dosya veya klasör | Görevi |
-| --- | --- |
-| `app/api/suggest/route.ts` | Öneri endpoint'i |
-| `app/api/recipe/route.ts` | Tarif detay endpoint'i |
-| `components/OneriClient.tsx` | Öneri ve tarif detay akışı |
-| `components/TarifKarti.tsx` | Tarif detay kartı ve adım ilerlemesi |
-| `lib/recommendations.ts` | Eşleşme, scoring, filtreleme ve exclusion |
-| `lib/recipe-repository.ts` | SQLite tarif sorguları |
-| `lib/shopping.ts` | Alışveriş listesi store'u |
-| `lib/favorites.ts` | Favori tarif store'u |
-| `lib/week-plan.ts` | Haftalık plan store'u |
-| `db/schema.ts` | Drizzle SQLite şeması |
-| `db/seed.ts` | Tarif katalogu seed'i |
-| `drizzle/` | Veritabanı migrationları |
-| `scripts/test-recommendations.ts` | Regression testleri |
+Repository bir `Dockerfile` içerir. Railway, Render veya Docker destekleyen başka bir platform projeyi bu dosyayı kullanarak yayınlayabilir.
+
+Railway’de güncel sürümü göndermek için:
+
+```bash
+railway up
+```
 
 ## Katkı
 
-Geliştirme kurulumu ve kontrol listesi için [CONTRIBUTING.md](CONTRIBUTING.md) dosyasına bakın. Her push ve pull request için GitHub Actions üzerinde lint, typecheck, database seed, recommendation testleri ve production build çalışır.
+Geliştirme kuralları ve kontrol listesi için [CONTRIBUTING.md](CONTRIBUTING.md) dosyasına bak.
 
 ## Lisans
 
-Bu repository için henüz bir lisans seçilmemiştir. Kullanım ve dağıtım koşulları belirlenene kadar kodu public bir projede yeniden dağıtmadan önce repository sahibiyle iletişime geçin.
+Bu repository için henüz bir lisans seçilmemiştir. Kodu yeniden dağıtmadan önce repository sahibiyle iletişime geçin.
