@@ -49,6 +49,7 @@ import {
   removePlannedRecipe,
   subscribePlan,
 } from "@/lib/week-plan";
+import type { PlanDay } from "@/lib/week-plan";
 
 // Bölüm başlıklarını küçük, renkli etiketler halinde gösterir
 function SectionLabel({
@@ -96,6 +97,20 @@ export default function HomePage() {
   );
   // "Yaptığım yemekler" ekleme kutusunun metni
   const [madeDraft, setMadeDraft] = useState("");
+  const todayIndex = (new Date().getDay() + 6) % 7;
+  const [selectedPlanDay, setSelectedPlanDay] = useState<PlanDay>(PLAN_DAYS[todayIndex]);
+  const [weekOffset, setWeekOffset] = useState(0);
+
+  const weekStart = new Date();
+  weekStart.setHours(0, 0, 0, 0);
+  weekStart.setDate(weekStart.getDate() - todayIndex + weekOffset * 7);
+  const selectedPlannedRecipe = plannedRecipes.find((item) => item.day === selectedPlanDay);
+
+  function getPlanDate(dayIndex: number) {
+    const date = new Date(weekStart);
+    date.setDate(weekStart.getDate() + dayIndex);
+    return date;
+  }
 
   // Kaydedilmiş bir tarifi geçmişten siler
   function handleRemove(id: string) {
@@ -317,48 +332,115 @@ export default function HomePage() {
       )}
 
       <section className="mt-12">
-        <div className="mb-3 flex items-center gap-2">
-          <SectionLabel color="text-violet-600 dark:text-violet-400">
-            Haftalık Plan
-          </SectionLabel>
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <SectionLabel color="text-violet-600 dark:text-violet-400">
+              Haftalık Plan
+            </SectionLabel>
+            <p className="mt-2 text-xs text-stone-500 dark:text-stone-400">
+              Bir güne tıkla; o gün için kaydettiğin tarifi aşağıda gör.
+            </p>
+          </div>
+          <div className="flex items-center gap-1 rounded-lg border border-stone-200 bg-white p-1 dark:border-stone-800 dark:bg-stone-900">
+            <button
+              type="button"
+              onClick={() => setWeekOffset((offset) => offset - 1)}
+              aria-label="Önceki hafta"
+              className="rounded-md px-2.5 py-1.5 text-sm text-stone-500 transition hover:bg-violet-50 hover:text-violet-700 dark:text-stone-400 dark:hover:bg-violet-950 dark:hover:text-violet-300"
+            >
+              &larr;
+            </button>
+            <span className="min-w-28 text-center text-[11px] font-bold text-stone-700 dark:text-stone-200">
+              {weekStart.toLocaleDateString("tr-TR", { day: "numeric", month: "short" })}
+              {" – "}
+              {getPlanDate(6).toLocaleDateString("tr-TR", { day: "numeric", month: "short" })}
+            </span>
+            <button
+              type="button"
+              onClick={() => setWeekOffset((offset) => offset + 1)}
+              aria-label="Sonraki hafta"
+              className="rounded-md px-2.5 py-1.5 text-sm text-stone-500 transition hover:bg-violet-50 hover:text-violet-700 dark:text-stone-400 dark:hover:bg-violet-950 dark:hover:text-violet-300"
+            >
+              &rarr;
+            </button>
+          </div>
         </div>
-        <ul className="space-y-2">
-          {PLAN_DAYS.map((day) => {
+
+        <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+          {PLAN_DAYS.map((day, index) => {
             const planned = plannedRecipes.find((item) => item.day === day);
+            const date = getPlanDate(index);
+            const isSelected = selectedPlanDay === day;
+            const isToday = weekOffset === 0 && index === todayIndex;
             return (
-              <li
+              <button
+                type="button"
                 key={day}
-                className="flex items-center gap-3 rounded-lg border border-stone-200 bg-white p-3 dark:border-stone-800 dark:bg-stone-900"
+                onClick={() => setSelectedPlanDay(day)}
+                aria-pressed={isSelected}
+                className={`min-h-25 rounded-xl border p-2 text-left transition sm:min-h-30 sm:p-2.5 ${
+                  isSelected
+                    ? "border-violet-600 bg-violet-600 text-white shadow-md shadow-violet-600/20"
+                    : "border-stone-200 bg-white hover:-translate-y-0.5 hover:border-violet-300 hover:shadow-sm dark:border-stone-800 dark:bg-stone-900 dark:hover:border-violet-700"
+                }`}
               >
-                <span className="w-20 shrink-0 text-xs font-bold text-stone-500 dark:text-stone-400">
-                  {day}
+                <span className={`block text-[9px] font-bold uppercase tracking-wide sm:text-[10px] ${isSelected ? "text-violet-100" : "text-stone-500 dark:text-stone-400"}`}>
+                  {day.slice(0, 3)}
+                </span>
+                <span className={`mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold ${
+                  isToday && !isSelected ? "bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300" : ""
+                }`}>
+                  {date.getDate()}
                 </span>
                 {planned ? (
-                  <>
-                    <span className="min-w-0 flex-1 truncate text-sm font-semibold text-stone-900 dark:text-stone-100">
-                      {planned.recipe.name}
-                    </span>
-                    <span className="text-[11px] text-stone-500 dark:text-stone-400">
-                      {planned.recipe.servings} kişi
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => removePlannedRecipe(day)}
-                      aria-label={`${day} planını kaldır`}
-                      className="rounded px-2 py-1 text-stone-400 transition hover:bg-stone-100 hover:text-red-600 dark:hover:bg-stone-800 dark:hover:text-red-400"
-                    >
-                      &times;
-                    </button>
-                  </>
+                  <span className={`mt-2 block line-clamp-3 text-[10px] font-bold leading-snug sm:text-[11px] ${isSelected ? "text-white" : "text-stone-800 dark:text-stone-100"}`}>
+                    {planned.recipe.name}
+                  </span>
                 ) : (
-                  <span className="text-xs text-stone-400 dark:text-stone-500">
-                    Henüz tarif eklenmedi
+                  <span className={`mt-3 block text-[10px] ${isSelected ? "text-violet-200" : "text-stone-400 dark:text-stone-600"}`}>
+                    Boş
                   </span>
                 )}
-              </li>
+              </button>
             );
           })}
-        </ul>
+        </div>
+
+        <div className={`mt-3 p-4 ${CARD}`}>
+          {selectedPlannedRecipe ? (
+            <div>
+              <div className="flex items-start gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-violet-100 text-lg dark:bg-violet-950">🍲</span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400">{selectedPlanDay}</p>
+                  <h3 className="mt-0.5 text-base font-bold text-stone-900 dark:text-stone-100">{selectedPlannedRecipe.recipe.name}</h3>
+                  <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">
+                    {selectedPlannedRecipe.recipe.servings} kişilik · {selectedPlannedRecipe.recipe.timeMinutes} dk · {selectedPlannedRecipe.recipe.difficulty}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removePlannedRecipe(selectedPlanDay)}
+                  aria-label={`${selectedPlanDay} planını kaldır`}
+                  className="rounded-md px-2 py-1 text-stone-400 transition hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/40 dark:hover:text-red-400"
+                >
+                  &times;
+                </button>
+              </div>
+              <div className="mt-4 border-t border-stone-100 pt-3 dark:border-stone-800">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">Malzemeler</p>
+                <p className="mt-1.5 text-xs leading-relaxed text-stone-700 dark:text-stone-300">
+                  {selectedPlannedRecipe.recipe.ingredients.map((ingredient) => `${ingredient.name} (${ingredient.amount})`).join(" · ")}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 py-1 text-sm text-stone-500 dark:text-stone-400">
+              <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-stone-100 text-lg dark:bg-stone-800">＋</span>
+              <p><strong className="text-stone-700 dark:text-stone-200">{selectedPlanDay}</strong> için henüz bir tarif kaydetmedin.</p>
+            </div>
+          )}
+        </div>
       </section>
 
       {/* Kaydedilen tariflerin geçmişi */}
