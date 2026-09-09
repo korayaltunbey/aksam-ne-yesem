@@ -8,6 +8,7 @@ import {
   toDietCode,
 } from "@/lib/recommendations";
 import { mapDatabaseRecipeToRecipe } from "@/lib/recipe-mapper";
+import { parseSuggestionRequest } from "@/lib/requests";
 
 function recipeFor(name: string) {
   const recipe = findRecipes().find((item) => item.name === name);
@@ -91,16 +92,63 @@ assert.equal(
   "1 tam + yarım adet"
 );
 
-for (const recipe of catalogRecipes) {
-  const practicalRecipe = mapDatabaseRecipeToRecipe(recipe, {
-    servings: Math.max(1, Math.round(recipe.baseServings / 2)),
+const servingOptions = [1, 2, 3, 4, 5, 6, 8, 10];
+for (const servings of servingOptions) {
+  const scaledRecipe = mapDatabaseRecipeToRecipe(fırındaSebzeliTavuk, {
+    servings,
   });
+  assert.equal(scaledRecipe.servings, servings);
+  assert.equal(scaledRecipe.ingredients.length, fırındaSebzeliTavuk.ingredients.length);
+  assert.ok(scaledRecipe.ingredients.every((item) => item.amount.trim().length > 0));
+}
+assert.equal(
+  mapDatabaseRecipeToRecipe(fırındaSebzeliTavuk, { servings: 1 }).ingredients.find(
+    (item) => item.name === "Tavuk göğsü"
+  )?.amount,
+  "yarım adet"
+);
+assert.equal(
+  mapDatabaseRecipeToRecipe(fırındaSebzeliTavuk, { servings: 3 }).ingredients.find(
+    (item) => item.name === "Tavuk göğsü"
+  )?.amount,
+  "1 tam + yarım adet"
+);
+assert.equal(
+  mapDatabaseRecipeToRecipe(fırındaSebzeliTavuk, { servings: 10 }).ingredients.find(
+    (item) => item.name === "Tavuk göğsü"
+  )?.amount,
+  "5 adet"
+);
+
+for (const recipe of catalogRecipes) {
+  assert.ok(recipe.baseServings > 0, `${recipe.name} için kişi sayısı geçersiz`);
   assert.ok(
-    practicalRecipe.ingredients.every(
-      (item) => !/(?:0,\d{2}|0\.\d{2}|¼|½|¾)/.test(item.amount)
+    recipe.ingredients.every(
+      (ingredient) =>
+        (ingredient.quantity !== null && ingredient.quantity > 0) ||
+        Boolean(ingredient.quantityText?.trim())
     ),
-    `${recipe.name} tarifinde matematiksel kesir kaldı`
+    `${recipe.name} tarifinde ölçüsüz malzeme var`
   );
+
+  for (const servings of servingOptions) {
+    const practicalRecipe = mapDatabaseRecipeToRecipe(recipe, { servings });
+    assert.equal(practicalRecipe.servings, servings);
+    assert.equal(practicalRecipe.ingredients.length, recipe.ingredients.length);
+    assert.ok(
+      practicalRecipe.ingredients.every(
+        (item) =>
+          item.amount.trim().length > 0 &&
+          !/(?:0,\d{2}|0\.\d{2}|¼|½|¾)/.test(item.amount)
+      ),
+      `${recipe.name} tarifinde ${servings} kişilik mutfak dışı ölçü kaldı`
+    );
+  }
+}
+
+for (const [value, expected] of [[0, 1], [2.6, 3], [50, 20], ["geçersiz", 2]] as const) {
+  const parsed = parseSuggestionRequest({ mode: "bana", servings: value });
+  assert.equal(parsed.req?.servings, expected);
 }
 
 const volumeRecipe = catalogRecipes.find((recipe) =>

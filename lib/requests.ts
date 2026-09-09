@@ -29,8 +29,11 @@ export function parseSuggestionRequest(body: unknown): {
         .slice(0, 100)
     : [];
 
-  // Kişi sayısı 1-20 aralığına sıkıştırılır (güvenlik/aşırı kullanım önlemi)
-  const servings = Math.min(Math.max(Number(b.servings) || 2, 1), 20);
+  // Kişi sayısı yalnızca 1-20 arasındaki tam sayı olabilir.
+  const requestedServings = Number(b.servings);
+  const servings = Number.isFinite(requestedServings)
+    ? Math.min(Math.max(Math.round(requestedServings), 1), 20)
+    : 2;
   const diet = typeof b.diet === "string" ? b.diet.trim() : "";
   const mealType = typeof b.mealType === "string" ? b.mealType.trim() : "";
   const cookingMethod =
