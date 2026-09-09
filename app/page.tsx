@@ -70,6 +70,7 @@ function SectionLabel({
 
 // Kartların ortak görünümü (açık modda beyaz, koyu modda koyu)
 const CARD = "rounded-xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900 dark:shadow-black/20";
+const PLAN_DAY_SHORT_NAMES = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
 
 export default function HomePage() {
   // Üç localStorage deposunu React'e bağlar (değişince otomatik yeniden çizilir)
@@ -346,7 +347,7 @@ export default function HomePage() {
               type="button"
               onClick={() => setWeekOffset((offset) => offset - 1)}
               aria-label="Önceki hafta"
-              className="rounded-md px-2.5 py-1.5 text-sm text-stone-500 transition hover:bg-violet-50 hover:text-violet-700 dark:text-stone-400 dark:hover:bg-violet-950 dark:hover:text-violet-300"
+              className="flex h-10 w-10 items-center justify-center rounded-md text-sm text-stone-500 transition hover:bg-violet-50 hover:text-violet-700 dark:text-stone-400 dark:hover:bg-violet-950 dark:hover:text-violet-300"
             >
               &larr;
             </button>
@@ -359,7 +360,7 @@ export default function HomePage() {
               type="button"
               onClick={() => setWeekOffset((offset) => offset + 1)}
               aria-label="Sonraki hafta"
-              className="rounded-md px-2.5 py-1.5 text-sm text-stone-500 transition hover:bg-violet-50 hover:text-violet-700 dark:text-stone-400 dark:hover:bg-violet-950 dark:hover:text-violet-300"
+              className="flex h-10 w-10 items-center justify-center rounded-md text-sm text-stone-500 transition hover:bg-violet-50 hover:text-violet-700 dark:text-stone-400 dark:hover:bg-violet-950 dark:hover:text-violet-300"
             >
               &rarr;
             </button>
@@ -380,7 +381,7 @@ export default function HomePage() {
             const calendarDayContent = (
               <>
                 <span className={`block text-[9px] font-bold uppercase tracking-wide sm:text-[10px] ${isSelected ? "text-violet-100" : "text-stone-500 dark:text-stone-400"}`}>
-                  {day.slice(0, 3)}
+                  {PLAN_DAY_SHORT_NAMES[index]}
                 </span>
                 <span className={`mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-[11px] font-bold ${
                   isToday && !isSelected ? "bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300" : ""
