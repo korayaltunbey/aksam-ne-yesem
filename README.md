@@ -28,18 +28,34 @@ Uygulamayı Chrome ya da Edge ile açtıktan sonra tarayıcı menüsünden **Uyg
 
 Hesap sistemi bulunmaz. Favoriler, alışveriş listesi, haftalık plan, tema ve geçmiş yalnızca kullandığın tarayıcının `localStorage` alanında saklanır. Başka bir cihazda otomatik görünmezler.
 
-## Yerelde Docker ile çalıştırma
+## Sıfır bilgisayarda Docker ile kurulum
 
-Docker Desktop kuruluysa aşağıdaki iki komut yeterlidir:
+Bu yöntem Windows, macOS veya Linux'ta projeyi Docker konteyneri içinde çalıştırır.
 
-```bash
-docker build -t aksam-ne-yesem .
-docker run --rm -p 3000:3000 aksam-ne-yesem
-```
+1. [Docker Desktop](https://www.docker.com/products/docker-desktop/) uygulamasını indirip kur.
+2. Docker Desktop'ı aç ve çalışır duruma gelmesini bekle.
+3. Terminali açıp projeyi indir:
 
-Ardından [http://localhost:3000](http://localhost:3000) adresini aç.
+   ```bash
+   git clone https://github.com/korayaltunbey/aksam-ne-yesem.git
+   cd aksam-ne-yesem
+   ```
 
-Bu yol Node.js, npm, SQLite veya C++ derleme araçlarını bilgisayarına kurdurmaz; tüm bağımlılıklar Docker konteynerinde hazırlanır.
+4. Docker imajını oluştur:
+
+   ```bash
+   docker build -t aksam-ne-yesem .
+   ```
+
+5. Uygulamayı başlat:
+
+   ```bash
+   docker run --rm -p 3000:3000 aksam-ne-yesem
+   ```
+
+6. Tarayıcıdan [http://localhost:3000](http://localhost:3000) adresini aç.
+
+Uygulamayı durdurmak için terminal penceresinde `Ctrl + C` tuşlarına bas. Aynı anda 3000 portunu kullanan başka bir uygulama varsa `-p 3001:3000` kullanıp [http://localhost:3001](http://localhost:3001) adresini aç.
 
 ## Geliştirme kurulumu
 
