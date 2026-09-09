@@ -92,6 +92,27 @@ assert.equal(
   "1 tam + yarım adet"
 );
 
+// Katalog tariflerinin temel miktarları 4 kişiliktir. Beş kişi seçildiğinde
+// malzemeler 5 katına değil, 1,25 katına çıkmalı.
+const sebzeliMercimekCorbasi = recipeFor("Sebzeli Mercimek Çorbası");
+assert.equal(sebzeliMercimekCorbasi.baseServings, 4);
+const fiveServingSebzeliMercimekCorbasi = mapDatabaseRecipeToRecipe(
+  sebzeliMercimekCorbasi,
+  { servings: 5 }
+);
+assert.equal(
+  fiveServingSebzeliMercimekCorbasi.ingredients.find((item) => item.name === "Mercimek")?.amount,
+  "1 tam + çeyrek su bardağı"
+);
+assert.equal(
+  fiveServingSebzeliMercimekCorbasi.ingredients.find((item) => item.name === "Havuç")?.amount,
+  "2 tam + yarım adet"
+);
+assert.equal(
+  fiveServingSebzeliMercimekCorbasi.ingredients.find((item) => item.name === "Zeytinyağı")?.amount,
+  "2 tam + yarım yemek kaşığı"
+);
+
 const servingOptions = [1, 2, 3, 4, 5, 6, 8, 10];
 for (const servings of servingOptions) {
   const scaledRecipe = mapDatabaseRecipeToRecipe(fırındaSebzeliTavuk, {

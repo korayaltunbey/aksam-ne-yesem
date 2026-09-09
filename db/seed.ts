@@ -1108,8 +1108,11 @@ function buildCatalogGroups(groups: CatalogGroup[]): SeedRecipe[] {
         cookingMethod: catalogCookingMethod(name, group.category),
         budgetLevel: catalogBudgetLevel(name, group.category),
         timeMinutes: group.times[index % group.times.length],
-        difficulty: group.times[index % group.times.length] <= 20 ? "Kolay" : index % 3 === 0 ? "Zor" : "Orta",
-        baseServings: [1, 2, 3, 4][index % 4],
+        difficulty: group.times[index % group.times.length] <= 20 ? "Kolay" : group.times[index % group.times.length] <= 45 ? "Orta" : "Zor",
+        // catalogMeasures içindeki miktarlar dört kişilik ev tarifi içindir.
+        // Önceki 1-4 kişilik döngü, aynı malzemeyi bazı tariflerde yanlışlıkla
+        // 1 kişilik sayarak kullanıcı seçtiğinde çok büyük miktarlara çıkarıyordu.
+        baseServings: 4,
         diets: group.diets[index % group.diets.length],
         ingredients: group.ingredientSets[index % group.ingredientSets.length].map(catalogIngredient),
         steps: catalogSteps(
@@ -1133,7 +1136,7 @@ const additionalRecipes = buildCatalogGroups([
     cuisine: "Türk Mutfağı", category: "Çorba",
     names: ["Sebzeli Mercimek Çorbası", "Brokoli Çorbası"],
     ingredientSets: [["Mercimek", "Havuç", "Soğan", "Zeytinyağı"], ["Brokoli", "Patates", "Soğan", "Süt"], ["Mantar", "Soğan", "Süt", "Tereyağı"], ["Tavuk göğsü", "Havuç", "Soğan", "Yumurta"]],
-    times: [15, 30, 45], diets: [["vegan", "vegetarian", "gluten_free", "low_calorie"], ["vegetarian", "gluten_free"], ["gluten_free"], ["vegetarian"]],
+    times: [35, 40], diets: [["vegan", "vegetarian", "gluten_free", "low_calorie"], ["vegetarian", "gluten_free"], ["gluten_free"], ["vegetarian"]],
   },
   {
     cuisine: "Türk Mutfağı", category: "Kahvaltı",
