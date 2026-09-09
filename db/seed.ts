@@ -959,6 +959,17 @@ function catalogCookingMethod(name: string, category: string): string {
     return "Pişirme yok";
   }
   if (
+    normalizedName.includes("tost") ||
+    normalizedName.includes("gozleme") ||
+    normalizedName.includes("krep") ||
+    normalizedName.includes("quesadilla")
+  ) {
+    return "Tava";
+  }
+  if (normalizedName.includes("humus") || normalizedName.includes("guacamole")) {
+    return "Pişirme yok";
+  }
+  if (
     category === "Hamur işi" ||
     normalizedName.includes("firin") ||
     normalizedName.includes("graten") ||
@@ -979,6 +990,33 @@ function catalogCookingMethod(name: string, category: string): string {
   return "Tencere";
 }
 
+function catalogBudgetLevel(name: string, category: string): string {
+  const normalizedName = normalizeIngredientName(name);
+  const premiumIngredients = [
+    "somon",
+    "karides",
+    "kuzu",
+    "dana",
+    "biftek",
+    "ton baligi",
+    "parmesan",
+    "avokado",
+  ];
+
+  if (premiumIngredients.some((item) => normalizedName.includes(item))) {
+    return "Yüksek";
+  }
+  if (
+    category === "Kahvaltı" ||
+    category === "Çorba" ||
+    category === "Salata/meze" ||
+    category === "Hamur işi"
+  ) {
+    return "Düşük";
+  }
+  return "Orta";
+}
+
 function buildCatalogGroups(groups: CatalogGroup[]): SeedRecipe[] {
   return groups.flatMap((group) =>
     group.names.map((name, index) => {
@@ -990,6 +1028,7 @@ function buildCatalogGroups(groups: CatalogGroup[]): SeedRecipe[] {
         cuisine: group.cuisine,
         mealType: catalogMealType(group.category),
         cookingMethod: catalogCookingMethod(name, group.category),
+        budgetLevel: catalogBudgetLevel(name, group.category),
         timeMinutes: group.times[index % group.times.length],
         difficulty: group.times[index % group.times.length] <= 20 ? "Kolay" : index % 3 === 0 ? "Zor" : "Orta",
         baseServings: [1, 2, 3, 4][index % 4],
@@ -1145,6 +1184,36 @@ const additionalRecipes = buildCatalogGroups([
     names: ["Elmalı Tarte Tatin", "Çikolatalı Mousse", "Limonlu Tart", "Krep Suzette", "Çilekli Yoğurt Parfe"],
     ingredientSets: [["Elma", "Un", "Tereyağı", "Toz şeker"], ["Kakao", "Yumurta", "Krema", "Toz şeker"], ["Limon suyu", "Un", "Yumurta", "Toz şeker"], ["Un", "Yumurta", "Portakal", "Tereyağı"], ["Yoğurt", "Çilek", "Akçaağaç şurubu"]],
     times: [15, 30, 45, 60], diets: [["vegetarian"], ["vegetarian", "gluten_free"], ["vegetarian"], ["vegetarian"], ["vegetarian", "gluten_free", "low_calorie"]],
+  },
+  {
+    cuisine: "Türk Mutfağı", category: "Hamur işi",
+    names: ["Patatesli Gözleme", "Peynirli Gözleme", "Ispanaklı Gözleme", "Kaşarlı Tost", "Sucuklu Tost", "Sigara Böreği", "Paçanga Böreği", "Mini Lahmacun", "Peynirli Mini Pide", "Fırın Patates Dilimleri", "Kabak Cipsi", "Çıtır Nohut"],
+    ingredientSets: [["Yufka", "Patates", "Soğan", "Zeytinyağı"], ["Yufka", "Beyaz peynir", "Maydanoz", "Zeytinyağı"], ["Ispanak", "Beyaz peynir", "Yufka", "Soğan"], ["Ekmek", "Kaşar peyniri", "Domates", "Tereyağı"], ["Nohut", "Zeytinyağı", "Kimyon", "Pul biber"]],
+    times: [10, 15, 20, 25, 30], diets: [["vegetarian"], ["vegetarian"], ["vegetarian", "gluten_free"], ["gluten_free", "vegan", "vegetarian"], []],
+  },
+  {
+    cuisine: "İtalyan mutfağı", category: "Hamur işi",
+    names: ["Mini Margherita Pizza", "Pesto Bruschetta", "Mozzarella Çubukları", "Domatesli Panini", "Mantarlı Panini", "Arancini", "Focaccia Dilimleri", "Ricotta Crostini"],
+    ingredientSets: [["Ekmek", "Domates", "Mozzarella", "Taze fesleğen"], ["Ekmek", "Mantar", "Mozzarella", "Zeytinyağı"], ["Pirinç", "Parmesan", "Mozzarella", "Domates sosu"], ["Ekmek", "Ricotta", "Domates", "Zeytinyağı"]],
+    times: [10, 15, 20, 25, 30], diets: [["vegetarian"], ["vegetarian"], ["vegetarian", "gluten_free"], ["vegetarian"]],
+  },
+  {
+    cuisine: "Asya mutfağı", category: "Hamur işi",
+    names: ["Sebzeli Spring Roll", "Tofulu Spring Roll", "Sebzeli Gyoza", "Edamame Atıştırmalığı", "Susamlı Pirinç Topları", "Sebzeli Onigiri", "Kore Usulü Patates", "Acılı Tofu Lokmaları"],
+    ingredientSets: [["Yufka", "Lahana", "Havuç", "Soya sosu"], ["Tofu", "Lahana", "Havuç", "Soya sosu"], ["Pirinç", "Salatalık", "Avokado", "Soya sosu"], ["Bezelye", "Susam", "Soya sosu", "Zeytinyağı"]],
+    times: [10, 15, 20, 25, 30], diets: [["vegan", "vegetarian"], ["vegan", "vegetarian", "gluten_free"], ["vegetarian"], ["vegan", "vegetarian", "gluten_free", "low_calorie"]],
+  },
+  {
+    cuisine: "Meksika mutfağı", category: "Hamur işi",
+    names: ["Guacamole ve Tortilla", "Peynirli Nachos", "Fasulyeli Nachos", "Mini Quesadilla", "Mısır Cipsli Salsa", "Avokadolu Taco Lokmaları"],
+    ingredientSets: [["Avokado", "Domates", "Tortilla", "Limon suyu"], ["Tortilla", "Kaşar peyniri", "Domates", "Mısır"], ["Kuru fasulye", "Mısır", "Tortilla", "Avokado"], ["Domates", "Kırmızı biber", "Mısır", "Limon suyu"]],
+    times: [10, 15, 20, 25, 30], diets: [["vegan", "vegetarian", "gluten_free"], ["vegetarian"], ["vegan", "vegetarian", "gluten_free"], ["vegetarian"]],
+  },
+  {
+    cuisine: "Türk Mutfağı", category: "Kahvaltı",
+    names: ["Ispanaklı Omlet", "Mantarlı Omlet", "Yulaflı Krep", "Peynirli Krep", "Avokadolu Yumurta Toast", "Lor Peynirli Tost", "Yoğurtlu Yulaf Kasesi", "Meyveli Chia Kasesi", "Domatesli Kaşarlı Tost", "Sebzeli Kahvaltı Tavası", "Muzlu Yulaf Pankek", "Zeytinli Açık Sandviç"],
+    ingredientSets: [["Yumurta", "Ispanak", "Beyaz peynir", "Soğan"], ["Yumurta", "Mantar", "Domates", "Kaşar peyniri"], ["Yulaf", "Süt", "Yumurta", "Muz"], ["Ekmek", "Avokado", "Yumurta", "Domates"], ["Yoğurt", "Yulaf", "Muz", "Tarçın"]],
+    times: [10, 15, 20, 25, 30], diets: [["vegetarian", "gluten_free"], ["vegetarian"], ["vegetarian", "low_calorie"], ["vegetarian", "gluten_free", "low_carb"]],
   },
 ]);
 
@@ -1672,7 +1741,8 @@ function upsertRecipe(recipe: SeedRecipe): number {
         mealType: recipe.mealType ?? catalogMealType(recipe.category),
         cookingMethod:
           recipe.cookingMethod ?? catalogCookingMethod(recipe.name, recipe.category),
-        budgetLevel: recipe.budgetLevel ?? null,
+        budgetLevel:
+          recipe.budgetLevel ?? catalogBudgetLevel(recipe.name, recipe.category),
         estimatedCostPerServing: recipe.estimatedCostPerServing ?? null,
         caloriesPerServing: recipe.caloriesPerServing ?? null,
         proteinGrams: recipe.proteinGrams ?? null,
@@ -1698,7 +1768,8 @@ function upsertRecipe(recipe: SeedRecipe): number {
       mealType: recipe.mealType ?? catalogMealType(recipe.category),
       cookingMethod:
         recipe.cookingMethod ?? catalogCookingMethod(recipe.name, recipe.category),
-      budgetLevel: recipe.budgetLevel ?? null,
+      budgetLevel:
+        recipe.budgetLevel ?? catalogBudgetLevel(recipe.name, recipe.category),
       estimatedCostPerServing: recipe.estimatedCostPerServing ?? null,
       caloriesPerServing: recipe.caloriesPerServing ?? null,
       proteinGrams: recipe.proteinGrams ?? null,

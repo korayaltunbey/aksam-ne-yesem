@@ -10,6 +10,7 @@ import { Spline_Sans_Mono } from "next/font/google"; // Berkeley Mono'nun ücret
 import { themeInitScript } from "@/lib/theme"; // ilk boyamadan önce temayı uygulayan kod
 import Header from "@/components/Header"; // her sayfada görünen üst bar
 import { InlineScript } from "@/app/components/InlineScript"; // hydration-güvenli inline script
+import { ServiceWorkerRegistration } from "@/app/components/ServiceWorkerRegistration";
 import "./globals.css";
 
 // Spline Sans Mono fontunu tanımlar; latin-ext Türkçe karakterleri (ş,ğ,ı...) kapsar
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <InlineScript html={themeInitScript()} />
       </head>
       <body className="min-h-full flex flex-col">
+        <ServiceWorkerRegistration />
         {/* Üst bar her sayfada sabittir */}
         <Header />
         {children}

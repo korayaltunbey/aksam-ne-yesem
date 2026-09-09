@@ -14,6 +14,21 @@ Elindeki malzemelere, damak tercihine ve ayırabileceğin zamana göre yemek ön
 - Açık/koyu tema
 - Harici bir yemek üretim servisi gerektirmeyen yerel SQLite katalogu
 
+## Herkes için kolay erişim
+
+Uygulamayı kullanıcıların bilgisayarına kurdurmak yerine bir bağlantıdan yayınlayın. Repository'yi GitHub'a gönderip Docker destekleyen Render, Railway veya Fly.io gibi bir hizmete bağlamak yeterlidir; hizmet bu repodaki `Dockerfile` ile uygulamayı ve tarif veritabanını hazırlar. Kullanıcılar yalnızca size ait ücretsiz hizmet adresini açar.
+
+Uygulama PWA manifesti içerir. HTTPS ile yayınlanan bağlantıyı Chrome veya Edge'de açan kullanıcılar, tarayıcı menüsündeki **Uygulama olarak yükle** seçeneğiyle uygulamayı masaüstüne ekleyebilir. Node.js, npm, SQLite ya da C++ araçları kurmaları gerekmez.
+
+Yerelde Docker ile yayın sürümünü denemek için:
+
+```bash
+docker build -t aksam-ne-yesem .
+docker run --rm -p 3000:3000 aksam-ne-yesem
+```
+
+Ardından [http://localhost:3000](http://localhost:3000) adresini açın.
+
 ## Teknoloji
 
 - Next.js 16 App Router

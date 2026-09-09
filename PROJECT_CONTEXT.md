@@ -5,7 +5,7 @@
 Akşam Ne Yesem?, elinizdeki malzemelere ve tercihlerinize göre uygun yemekleri keşfetmenizi sağlayan yerel bir yemek öneri uygulamasıdır.
 
 - Paket adı: `aksam-ne-yesem`
-- Tarif kataloğu: 211 tarif
+- Tarif kataloğu: 255 tarif
 - Veritabanı: `data/aksam-ne-yesem.db`
 - Veritabanı teknolojisi: SQLite + Drizzle ORM
 - Uygulama: Next.js App Router, React, TypeScript ve Tailwind CSS
@@ -80,7 +80,7 @@ Genel `Bana Öner` modunda ingredient filtresi uygulanmaz; diğer filtreler çal
 
 ## Tarif kataloğu ve veritabanı
 
-Katalog 211 tarif içerir. Türk, İtalyan, Asya, Meksika, Akdeniz ve diğer desteklenen mutfaklar; kahvaltı, çorba, ana yemek, salata/meze, hamur işi ve tatlı kategorileri bulunur. Diyet etiketleri, süreler, kişi sayıları ve ingredient miktarları seed verisinde tutulur.
+Katalog 255 tarif içerir. Türk, İtalyan, Asya, Meksika, Akdeniz ve diğer desteklenen mutfaklar; kahvaltı, çorba, ana yemek, salata/meze, hamur işi ve tatlı kategorileri bulunur. Diyet etiketleri, süreler, kişi sayıları ve ingredient miktarları seed verisinde tutulur.
 
 `db/seed.ts` slug değerleri üzerinden idempotent çalışır ve mevcut tarifleri korur. Veritabanı dosyası `data/aksam-ne-yesem.db` olarak tutulur; mevcut katalog yeni dosya adına taşınarak korunmuştur.
 
@@ -106,4 +106,4 @@ npm run lint
 npm run build
 ```
 
-Bu dosya, Akşam Ne Yesem? uygulamasının güncel SQLite + Drizzle tabanlı yerel recommendation mimarisini ve 211 tariflik kataloğunu yansıtır.
+Bu dosya, Akşam Ne Yesem? uygulamasının güncel SQLite + Drizzle tabanlı yerel recommendation mimarisini ve 255 tariflik kataloğunu yansıtır.

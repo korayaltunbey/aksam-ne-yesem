@@ -161,6 +161,54 @@ assertRecipeFilters(combinedSuggestions, {
   maxTime: 30,
 });
 
+// Formdaki her tekil filtre tercihi en az beş gerçek tarif bulabilmeli.
+// Bu kontrol, katalog büyütülürken bir seçeneğin boşa düşmesini engeller.
+type CoverageCheck = {
+  label: string;
+  request: Parameters<typeof getRecommendations>[0];
+  matches: (recipe: ReturnType<typeof recipeFor>) => boolean;
+};
+
+const coverageChecks: CoverageCheck[] = [
+  ...["Kahvaltı", "Öğle", "Akşam", "Atıştırmalık", "Tatlı"].map(
+    (mealType) => ({
+      label: `Öğün: ${mealType}`,
+      request: { mealType },
+      matches: (recipe: ReturnType<typeof recipeFor>) =>
+        recipe.mealType === mealType,
+    })
+  ),
+  ...[15, 30, 45, 60].map((maxTime) => ({
+    label: `Süre: ${maxTime} dk`,
+    request: { maxTime },
+    matches: (recipe: ReturnType<typeof recipeFor>) =>
+      recipe.timeMinutes <= maxTime,
+  })),
+  ...["Tencere", "Tava", "Fırın", "Pişirme yok"].map(
+    (cookingMethod) => ({
+      label: `Pişirme yöntemi: ${cookingMethod}`,
+      request: { cookingMethod },
+      matches: (recipe: ReturnType<typeof recipeFor>) =>
+        recipe.cookingMethod === cookingMethod,
+    })
+  ),
+  ...["Düşük", "Orta", "Yüksek"].map((budgetLevel) => ({
+    label: `Bütçe: ${budgetLevel}`,
+    request: { budgetLevel },
+    matches: (recipe: ReturnType<typeof recipeFor>) =>
+      recipe.budgetLevel === budgetLevel,
+  })),
+];
+
+for (const { label, request, matches } of coverageChecks) {
+  const suggestions = getRecommendations(request);
+  assert.equal(suggestions.length, 5, `${label} için beş öneri bekleniyor`);
+  assert.ok(
+    suggestions.every((suggestion) => matches(recipeFor(suggestion.name))),
+    `${label} filtresine uymayan bir tarif döndü`
+  );
+}
+
 // F: Bana Öner modunda ingredient hard filter uygulanmaz; diğer filtreler uygulanır.
 const generalSuggestions = getRecommendations({
   diet: "Vejetaryen",

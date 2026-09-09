@@ -26,6 +26,7 @@ import {
   setPlannedRecipe,
   type PlanDay,
 } from "@/lib/week-plan";
+import type { FilterAvailability } from "@/lib/filter-availability";
 import {
   getMadeSnapshot,
   getMadeServerSnapshot,
@@ -129,6 +130,8 @@ export default function OneriClient({
   const [budgetLevel, setBudgetLevel] = useState("");
   const [maxTime, setMaxTime] = useState("");
   const [cuisine, setCuisine] = useState("");
+  const [filterAvailability, setFilterAvailability] =
+    useState<FilterAvailability | null>(null);
 
   // Öneri listesi durumu
   const [suggestions, setSuggestions] = useState<DishSuggestion[] | null>(null);
@@ -155,6 +158,61 @@ export default function OneriClient({
     () => dedupeIgnoreCase([...made, ...suggested]),
     [made, suggested]
   );
+
+  // Her filtre seçeneğinin, diğer geçerli seçimlerle en az bir tarif üretip
+  // üretmediğini sorgula. Sonuç vermeyen seçenekler seçilemez olur.
+  const canCheckFilterAvailability =
+    mode !== "dolap" || ingredients.length > 0;
+
+  useEffect(() => {
+    if (!canCheckFilterAvailability) return;
+
+    const controller = new AbortController();
+    void fetch("/api/filter-options", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      signal: controller.signal,
+      body: JSON.stringify({
+        mode,
+        ingredients,
+        servings,
+        diet,
+        mealType,
+        cookingMethod,
+        budgetLevel,
+        maxTime: maxTime ? Number(maxTime) : null,
+        cuisine,
+        excludeNames,
+        excludeMadeNames: made,
+        excludeIngredients: [],
+      }),
+    })
+      .then(async (res) => {
+        if (!res.ok) throw new Error("Filtre seçenekleri yüklenemedi.");
+        return res.json() as Promise<{ availability?: FilterAvailability }>;
+      })
+      .then((data) => {
+        if (data.availability) setFilterAvailability(data.availability);
+      })
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setFilterAvailability(null);
+      });
+
+    return () => controller.abort();
+  }, [canCheckFilterAvailability, mode, ingredients, servings, diet, mealType, cookingMethod, budgetLevel, maxTime, cuisine, excludeNames, made]);
+
+  function isUnavailable(
+    field: keyof FilterAvailability,
+    value: string | number
+  ): boolean {
+    return Boolean(
+      value !== "" &&
+        canCheckFilterAvailability &&
+        filterAvailability &&
+        !filterAvailability[field][String(value)]
+    );
+  }
 
   // 1. Adım: 5 yemeklik listeyi üretir
   const generateList = useCallback(async () => {
@@ -560,7 +618,7 @@ export default function OneriClient({
               className={SELECT_CLASS}
             >
               {DIET_OPTIONS.map((d) => (
-                <option key={d} value={d}>
+                <option key={d} value={d} disabled={isUnavailable("diet", d)}>
                   {d || "Fark etmez"}
                 </option>
               ))}
@@ -578,7 +636,11 @@ export default function OneriClient({
               className={SELECT_CLASS}
             >
               {TIME_OPTIONS.map((t) => (
-                <option key={t.value} value={t.value}>
+                <option
+                  key={t.value}
+                  value={t.value}
+                  disabled={isUnavailable("maxTime", t.value)}
+                >
                   {t.label}
                 </option>
               ))}
@@ -596,7 +658,11 @@ export default function OneriClient({
               className={SELECT_CLASS}
             >
               {CUISINE_OPTIONS.map((c) => (
-                <option key={c} value={c}>
+                <option
+                  key={c}
+                  value={c}
+                  disabled={isUnavailable("cuisine", c)}
+                >
                   {c || "Fark etmez"}
                 </option>
               ))}
@@ -614,7 +680,11 @@ export default function OneriClient({
               className={SELECT_CLASS}
             >
               {MEAL_TYPE_OPTIONS.map((option) => (
-                <option key={option} value={option}>
+                <option
+                  key={option}
+                  value={option}
+                  disabled={isUnavailable("mealType", option)}
+                >
                   {option || "Öğün fark etmez"}
                 </option>
               ))}
@@ -632,7 +702,11 @@ export default function OneriClient({
               className={SELECT_CLASS}
             >
               {COOKING_METHOD_OPTIONS.map((option) => (
-                <option key={option} value={option}>
+                <option
+                  key={option}
+                  value={option}
+                  disabled={isUnavailable("cookingMethod", option)}
+                >
                   {option || "Yöntem fark etmez"}
                 </option>
               ))}
@@ -650,7 +724,11 @@ export default function OneriClient({
               className={SELECT_CLASS}
             >
               {BUDGET_OPTIONS.map((option) => (
-                <option key={option} value={option}>
+                <option
+                  key={option}
+                  value={option}
+                  disabled={isUnavailable("budgetLevel", option)}
+                >
                   {option || "Bütçe fark etmez"}
                 </option>
               ))}
