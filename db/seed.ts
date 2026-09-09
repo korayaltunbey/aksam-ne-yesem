@@ -934,12 +934,90 @@ function catalogIngredient(name: string): SeedIngredient {
   return ingredient(name, quantity, unit);
 }
 
-function catalogSteps(name: string, category: string): string[] {
-  if (category === "Çorba") return [`${name} için sebze ve ana malzemeleri doğrayıp tencerede kısa süre sotele.`, "Su veya uygun sıvıyı ekleyip malzemeler yumuşayana kadar kaynat.", "Baharatını ayarlayıp sıcak servis et."];
-  if (category === "Salata/meze") return [`${name} için malzemeleri doğrayıp hazırlama kabına al.`, "Sosu ayrı karıştırıp malzemelerle harmanla.", "Dinlendirip soğuk servis et."];
-  if (category === "Tatlı") return [`${name} için malzemeleri pürüzsüz bir karışım olana kadar birleştir.`, "Tarife uygun olarak pişir veya soğuk şekilde dinlendir.", "Porsiyonlayıp servis et."];
-  if (category === "Hamur işi") return [`${name} için hamur veya tabanı hazırlayıp dinlendir.`, "İç malzemeyi yerleştirip fırında ya da tavada kızarana kadar pişir.", "Kısa süre dinlendirip servis et."];
-  return [`${name} için malzemeleri hazırlayıp doğra.`, "Ana malzemeyi tavada veya tencerede pişirip sos ve baharatları ekle.", "Malzemeler tamamen pişince sıcak servis et."];
+function formatSeedAmount(item: SeedIngredient): string {
+  if (item.quantity === null) return item.quantityText ?? item.unit;
+
+  if (item.unit === "mililitre" || item.unit === "ml") {
+    const glasses = item.quantity / 200;
+    if (glasses >= 1) {
+      return `${glasses.toLocaleString("tr-TR", { maximumFractionDigits: 2 })} su bardağı`;
+    }
+    return `${(item.quantity / 100).toLocaleString("tr-TR", { maximumFractionDigits: 2 })} çay bardağı`;
+  }
+
+  if (item.unit === "litre") {
+    return `${(item.quantity * 5).toLocaleString("tr-TR", { maximumFractionDigits: 2 })} su bardağı`;
+  }
+
+  const amount = Number.isInteger(item.quantity)
+    ? String(item.quantity)
+    : item.quantity.toLocaleString("tr-TR", { maximumFractionDigits: 2 });
+  return `${amount} ${item.unit}`;
+}
+
+function catalogSteps(
+  name: string,
+  category: string,
+  items: SeedIngredient[]
+): string[] {
+  const measuredIngredients = items
+    .map((item) => `${item.name} (${formatSeedAmount(item)})`)
+    .join(", ");
+  const mainIngredient = items[0]?.name ?? "ana malzeme";
+  const supportingIngredients = items
+    .slice(1, 4)
+    .map((item) => item.name)
+    .join(", ");
+
+  const preparation = `Ön hazırlık: ${measuredIngredients} malzemelerini tezgâha çıkar. ${supportingIngredients || "Diğer malzemeleri"} tarifte kullanılacak şekilde yıka, gerekiyorsa doğra veya rendele.`;
+
+  if (category === "Çorba") {
+    return [
+      preparation,
+      `Orta boy tencereyi ısıt. ${mainIngredient} ve doğranan malzemeleri az yağla orta ateşte 3-4 dakika, renkleri dönene kadar karıştırarak sotele.`,
+      "Baharatları ekleyip 30 saniye daha karıştır; bu aşama baharatların kokusunu açar.",
+      "Üzerini iki parmak geçecek kadar sıcak su ekle. Kaynayınca ocağı kıs ve kapağı yarı açık şekilde malzemeler tamamen yumuşayana kadar 20-25 dakika pişir.",
+      "Kıvamı kontrol et; gerekirse biraz sıcak su ekle. İstersen blenderdan geçir, tuzunu en son ayarlayıp 2 dakika dinlendirerek sıcak servis et.",
+    ];
+  }
+
+  if (category === "Salata/meze") {
+    return [
+      preparation,
+      `${mainIngredient} ve diğer taze malzemeleri eşit büyüklükte doğrayıp geniş bir karıştırma kabına al.`,
+      "Sos için yağ, limon veya sirke ve baharatları küçük bir kasede iyice çırp.",
+      "Sosu servisten hemen önce malzemelerin üzerine gezdirip ezmeden nazikçe harmanla.",
+      "Tadını kontrol edip tuzunu ayarla. 5 dakika dinlendirip soğuk veya oda sıcaklığında servis et.",
+    ];
+  }
+
+  if (category === "Tatlı") {
+    return [
+      preparation,
+      "Sıvı ve kuru malzemeleri ayrı kaplarda karıştır; toz malzemeleri eklerken topaklanmaması için çırpıcı kullan.",
+      "Karışımı pürüzsüz olana kadar 1-2 dakika çırp. Pişecek tatlılarda kısık-orta ateşte sürekli karıştırarak kıvam aldır.",
+      "Kıvam alan karışımı servis kaplarına paylaştır veya tarifin kalıbına aktar. Fırın kullanılıyorsa önceden ısıtılmış fırında üstü hafif renk alana kadar pişir.",
+      "Önce oda sıcaklığına gelmesini bekle, ardından gerekiyorsa buzdolabında en az 30 dakika dinlendir. Porsiyonlayıp servis et.",
+    ];
+  }
+
+  if (category === "Hamur işi") {
+    return [
+      preparation,
+      "Hamur veya ekmek tabanı kullanılacaksa çalışma yüzeyini hafifçe unla. İç malzemeleri ayrı bir kapta karıştırıp tuz ve baharatını ayarla.",
+      "Tabanı aç veya hazır yufkayı ser. İç harcı kenarlarda 1-2 parmak boşluk kalacak şekilde yay ve istediğin biçimde kapat.",
+      "Tavada yapılacak tarifleri orta ateşte iki yüzü kızarana kadar çevirerek; fırın tariflerini ise önceden ısıtılmış fırında üstü altın rengi olana kadar pişir.",
+      "Pişen hamur işini 3-4 dakika dinlendir. Dilimleyip sıcak servis et.",
+    ];
+  }
+
+  return [
+    preparation,
+    `${mainIngredient} ve sert sebzeleri geniş bir tava veya tencerede orta ateşte 3-4 dakika çevirerek pişirmeye başla.`,
+    "Diğer malzemeleri sırasıyla ekle; her eklemeden sonra malzemelerin birbirine karışması için 1 dakika karıştır.",
+    "Baharatları ve gerekiyorsa sıcak suyu ekle. Kapağı kapalı, kısık-orta ateşte malzemeler yumuşayana ve sos kıvam alana kadar 15-20 dakika pişir.",
+    "Tuzunu en son kontrol et. Ocağı kapatıp 3 dakika dinlendir, ardından sıcak servis et.",
+  ];
 }
 
 function catalogMealType(category: string): string {
@@ -1034,7 +1112,11 @@ function buildCatalogGroups(groups: CatalogGroup[]): SeedRecipe[] {
         baseServings: [1, 2, 3, 4][index % 4],
         diets: group.diets[index % group.diets.length],
         ingredients: group.ingredientSets[index % group.ingredientSets.length].map(catalogIngredient),
-        steps: catalogSteps(name, group.category),
+        steps: catalogSteps(
+          name,
+          group.category,
+          group.ingredientSets[index % group.ingredientSets.length].map(catalogIngredient)
+        ),
       } satisfies SeedRecipe;
     })
   );
@@ -1702,6 +1784,56 @@ const curatedCatalogV2SecondBatch: SeedRecipe[] = [
   },
 ];
 
+const detailedRecipes: SeedRecipe[] = [
+  {
+    slug: "tavuklu-perde-pilavi",
+    name: "Tavuklu Perde Pilavı",
+    category: "Ana yemek",
+    cuisine: "Türk Mutfağı",
+    mealType: "Akşam",
+    cookingMethod: "Fırın",
+    budgetLevel: "Orta",
+    estimatedCostPerServing: 95,
+    timeMinutes: 90,
+    difficulty: "Orta",
+    baseServings: 6,
+    diets: [],
+    ingredients: [
+      ingredient("Tavuk göğsü", 2, "adet"),
+      ingredient("Pirinç", 2, "su bardağı"),
+      ingredient("Kuru soğan", 1, "adet"),
+      ingredient("Sarımsak", 1, "diş"),
+      ingredient("Sıvı yağ", 0.5, "çay bardağı"),
+      ingredient("Tereyağı", 1, "yemek kaşığı"),
+      ingredient("Domates salçası", 1, "yemek kaşığı"),
+      ingredient("Toz biber", 1, "tatlı kaşığı"),
+      ingredient("Pul biber", 1, "tatlı kaşığı"),
+      ingredient("Karabiber", 1, "tatlı kaşığı"),
+      ingredient("Nane", 1, "tatlı kaşığı"),
+      ingredient("Reyhan", 1, "tatlı kaşığı"),
+      ingredient("Kimyon", 1, "tatlı kaşığı"),
+      ingredient("Zerdeçal", 1, "çay kaşığı"),
+      ingredient("Tuz", null, "tutam", { quantityText: "damak tadına göre" }),
+      ingredient("Sıcak su", 3, "su bardağı"),
+      ingredient("Yumurta", 2, "adet"),
+      ingredient("Ilık su", 2, "su bardağı"),
+      ingredient("Un", 5.5, "su bardağı"),
+    ],
+    steps: [
+      "Tavuk göğüslerini tencereye alıp üzerini geçecek kadar su ekle. Kaynadıktan sonra orta ateşte 20-25 dakika haşla; ılınınca tavukları didikle ve haşlama suyunu pilavda kullanmak üzere ayır.",
+      "Pirinci geniş bir kasede ılık ve tuzlu suda 15 dakika beklet. Suyu berraklaşana kadar yıkayıp süzgeçte 5 dakika beklet.",
+      "Pilav için soğanı küçük küpler halinde doğra, sarımsağı ez. Tencerede sıvı yağ ve tereyağını ısıtıp soğanı 3-4 dakika pembeleştir; sarımsağı ekleyip 30 saniye çevir.",
+      "Salçayı ve toz biberi ekleyip kokusu çıkana kadar 1 dakika kavur. Süzülen pirinci ilave edip taneler yağla kaplanana kadar 2 dakika karıştır.",
+      "Didiklenmiş tavukları, pul biberi, karabiberi, naneyi, reyhanı, kimyonu, zerdeçalı ve tuzu tencereye ekle. 3 su bardağı sıcak tavuk suyunu dök; kaynayınca kapağı kapatıp en kısık ateşte 12-15 dakika pişir.",
+      "Pilav suyunu çekince ocağı kapat. Kapağın altına temiz bir bez veya kâğıt havlu koyup 15 dakika dinlendir; bu sırada hamuru hazırla.",
+      "Hamur için yumurta, ılık su ve 2 tatlı kaşığı tuzu yoğurma kabında karıştır. Unu bardak bardak ekleyerek ele hafif yapışan, yumuşak bir hamur yoğur; üzerini kapatıp 10 dakika dinlendir.",
+      "Fırına dayanıklı derin bir kabı yağla. Hamurun üçte ikisini kabın tabanını ve kenarlarını kaplayacak büyüklükte aç; dinlenmiş tavuklu pilavı içine doldur ve kenarlardan sarkan hamuru üzerine kapat.",
+      "Kalan hamuru kapak olacak şekilde açıp üstüne yerleştir. Kenarlarını bastırarak kapat, üzerine birkaç küçük delik aç ve 180 derece önceden ısıtılmış fırında 30-35 dakika altın rengi olana kadar pişir.",
+      "Fırından çıkan perde pilavını 10 dakika dinlendir. Servis tabağına dikkatlice ters çevirip dilimleyerek sıcak servis et.",
+    ],
+  },
+];
+
 const pantryStaples = new Set([
   "Su",
   "Tuz",
@@ -1724,6 +1856,19 @@ const pantryStaples = new Set([
   "Susam",
   "Kakao",
 ]);
+
+function withDetailedPreparation(recipe: SeedRecipe): string[] {
+  if (recipe.steps[0]?.startsWith("Ön hazırlık:")) return recipe.steps;
+
+  const measuredIngredients = recipe.ingredients
+    .map((item) => `${item.name} (${formatSeedAmount(item)})`)
+    .join(", ");
+
+  return [
+    `Ön hazırlık: ${measuredIngredients} malzemelerini tezgâha çıkar. Sebzeleri yıka ve tarifte istenen şekilde doğra; tüm ölçüleri pişirmeye başlamadan hazır et.`,
+    ...recipe.steps,
+  ];
+}
 
 function upsertRecipe(recipe: SeedRecipe): number {
   const existing = db
@@ -1815,6 +1960,7 @@ db.transaction(() => {
     ...additionalRecipes,
     ...curatedCatalogV2,
     ...curatedCatalogV2SecondBatch,
+    ...detailedRecipes,
   ]) {
     const recipeId = upsertRecipe(recipe);
 
@@ -1838,7 +1984,7 @@ db.transaction(() => {
 
     db.insert(recipeSteps)
       .values(
-        recipe.steps.map((instruction, index) => ({
+        withDetailedPreparation(recipe).map((instruction, index) => ({
           recipeId,
           stepOrder: index + 1,
           instruction,

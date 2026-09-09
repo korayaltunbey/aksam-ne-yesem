@@ -22,7 +22,7 @@ Uygulamayı Chrome ya da Edge ile açtıktan sonra tarayıcı menüsünden **Uyg
 - Favoriler, haftalık yemek planı, adım takibi ve tarif kopyalama
 - Aynı tarifleri tekrar önermeme ve “yaptım” listesi
 - Açık/koyu tema
-- 255 tariflik yerel SQLite kataloğu
+- 256 tariflik yerel SQLite kataloğu
 
 ## Kullanıcı verileri
 

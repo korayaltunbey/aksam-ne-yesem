@@ -22,6 +22,43 @@ function hasIngredient(name: string, ingredientName: string) {
   );
 }
 
+// Katalogdaki her tarif, mutfakta uygulanabilir bir hazırlık adımı ve
+// yeterli sayıda yapılış adımı içermeli.
+const catalogRecipes = findRecipes();
+assert.ok(catalogRecipes.length >= 256);
+assert.ok(catalogRecipes.every((recipe) => recipe.steps.length >= 4));
+assert.ok(
+  catalogRecipes.every((recipe) =>
+    recipe.steps[0]?.startsWith("Ön hazırlık:")
+  )
+);
+
+const perdePilavi = recipeFor("Tavuklu Perde Pilavı");
+assert.ok(perdePilavi.steps.length >= 10);
+assert.ok(
+  perdePilavi.steps.some((step) => step.includes("180 derece"))
+);
+assert.ok(
+  catalogRecipes.every((recipe) =>
+    recipe.steps.every(
+      (step) => !step.includes("için malzemeleri hazırlayıp doğra")
+    )
+  )
+);
+
+const volumeRecipe = catalogRecipes.find((recipe) =>
+  recipe.ingredients.some((ingredient) =>
+    ["mililitre", "ml", "litre"].includes(ingredient.unit)
+  )
+);
+assert.ok(volumeRecipe, "Ölçü dönüşümünü doğrulayacak sıvı tarif bulunamadı");
+const mappedVolumeRecipe = mapDatabaseRecipeToRecipe(volumeRecipe);
+assert.ok(
+  mappedVolumeRecipe.ingredients
+    .filter((ingredient) => /(?:mililitre|ml|litre)/.test(ingredient.amount))
+    .length === 0
+);
+
 function assertRecipeFilters(
   suggestions: ReturnType<typeof getRecommendations>,
   filters: { diet?: string; cuisine?: string; maxTime?: number }

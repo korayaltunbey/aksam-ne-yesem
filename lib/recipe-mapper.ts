@@ -21,6 +21,20 @@ function formatAmount(
   if (quantity === null) return quantityText || unit;
 
   const scaledQuantity = Math.round(quantity * multiplier * 100) / 100;
+
+  // Sıvı miktarlarını tarif ekranında daha pratik mutfak ölçüleriyle göster.
+  if (unit === "mililitre" || unit === "ml") {
+    const glasses = Math.round((scaledQuantity / 200) * 100) / 100;
+    if (glasses >= 1) return `${formatNumber(glasses)} su bardağı`;
+
+    const teaGlasses = Math.round((scaledQuantity / 100) * 100) / 100;
+    return `${formatNumber(teaGlasses)} çay bardağı`;
+  }
+
+  if (unit === "litre") {
+    return `${formatNumber(scaledQuantity * 5)} su bardağı`;
+  }
+
   return `${formatNumber(scaledQuantity)} ${unit}`;
 }
 
