@@ -6,19 +6,11 @@
 
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Spline_Sans_Mono } from "next/font/google"; // Berkeley Mono'nun ücretsiz alternatifi
 import { themeInitScript } from "@/lib/theme"; // ilk boyamadan önce temayı uygulayan kod
 import Header from "@/components/Header"; // her sayfada görünen üst bar
 import { InlineScript } from "@/app/components/InlineScript"; // hydration-güvenli inline script
 import { ServiceWorkerRegistration } from "@/app/components/ServiceWorkerRegistration";
 import "./globals.css";
-
-// Spline Sans Mono fontunu tanımlar; latin-ext Türkçe karakterleri (ş,ğ,ı...) kapsar
-const splineMono = Spline_Sans_Mono({
-  variable: "--font-spline-mono",
-  subsets: ["latin", "latin-ext"],
-  weight: ["400", "500", "600", "700"],
-});
 
 // Tüm sayfaların ortak meta verisi (tarayıcı sekmesi + arama motorları)
 export const metadata: Metadata = {
@@ -37,7 +29,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html
       lang="tr"
       suppressHydrationWarning
-      className={`${splineMono.variable} h-full antialiased`}
+      className="h-full antialiased"
     >
       <head>
         {/* Kayıtlı temayı sayfa boyanmadan önce uygular (yanıp sönmeyi engeller) */}
